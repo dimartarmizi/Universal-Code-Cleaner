@@ -1,11 +1,13 @@
 import * as vscode from 'vscode';
 import {
 	removeCommentsCurrentFile,
-	removeDeadCodeCurrentFile
+	removeDeadCodeCurrentFile,
+	removeEmptyLinesCurrentFile
 } from './commands/cleanCurrentFile';
 import {
 	removeCommentsWorkspace,
-	removeDeadCodeWorkspace
+	removeDeadCodeWorkspace,
+	removeEmptyLinesWorkspace
 } from './commands/cleanWorkspace';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -37,11 +39,27 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	);
 
+	const disposableRemoveEmptyLinesCurrent = vscode.commands.registerCommand(
+		'codeCleaner.removeEmptyLinesCurrentFile',
+		async () => {
+			await removeEmptyLinesCurrentFile();
+		}
+	);
+
+	const disposableRemoveEmptyLinesWorkspace = vscode.commands.registerCommand(
+		'codeCleaner.removeEmptyLinesWorkspace',
+		async () => {
+			await removeEmptyLinesWorkspace();
+		}
+	);
+
 	context.subscriptions.push(
 		disposableRemoveCommentsCurrent,
 		disposableRemoveCommentsWorkspace,
 		disposableRemoveDeadCodeCurrent,
-		disposableRemoveDeadCodeWorkspace
+		disposableRemoveDeadCodeWorkspace,
+		disposableRemoveEmptyLinesCurrent,
+		disposableRemoveEmptyLinesWorkspace
 	);
 }
 

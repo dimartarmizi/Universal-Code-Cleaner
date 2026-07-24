@@ -29,6 +29,14 @@
       {
         "command": "codeCleaner.removeDeadCodeWorkspace",
         "title": "Clean Code: Remove Dead Code from Workspace"
+      },
+      {
+        "command": "codeCleaner.removeEmptyLinesCurrentFile",
+        "title": "Clean Code: Remove Empty Lines from Current File"
+      },
+      {
+        "command": "codeCleaner.removeEmptyLinesWorkspace",
+        "title": "Clean Code: Remove Empty Lines from Workspace"
       }
     ],
     "configuration": {

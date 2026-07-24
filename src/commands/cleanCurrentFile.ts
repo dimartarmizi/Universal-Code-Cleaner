@@ -3,10 +3,12 @@ import { getSettings } from '../settings/config';
 import { showPreview, showStatistics } from '../preview/diffPreview';
 import { CommentProcessor } from '../remover/commentProcessor';
 import { DeadCodeProcessor } from '../remover/deadCodeProcessor';
+import { EmptyLinesProcessor } from '../remover/emptyLinesProcessor';
 import { applyProcessorToEditor } from '../remover/cleanerEngine';
 
 const commentProcessor = new CommentProcessor();
 const deadCodeProcessor = new DeadCodeProcessor();
+const emptyLinesProcessor = new EmptyLinesProcessor();
 
 export async function removeCommentsCurrentFile() {
 	const editor = vscode.window.activeTextEditor;
@@ -26,4 +28,14 @@ export async function removeDeadCodeCurrentFile() {
 	}
 	const settings = getSettings();
 	await applyProcessorToEditor(editor, deadCodeProcessor, settings, showPreview, showStatistics);
+}
+
+export async function removeEmptyLinesCurrentFile() {
+	const editor = vscode.window.activeTextEditor;
+	if (!editor) {
+		vscode.window.showErrorMessage('No active text editor found.');
+		return;
+	}
+	const settings = getSettings();
+	await applyProcessorToEditor(editor, emptyLinesProcessor, settings, showPreview, showStatistics);
 }

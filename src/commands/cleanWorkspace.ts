@@ -4,10 +4,12 @@ import { showPreview, showStatistics } from '../preview/diffPreview';
 import { scanWorkspace } from '../scanner/workspaceScanner';
 import { CommentProcessor } from '../remover/commentProcessor';
 import { DeadCodeProcessor } from '../remover/deadCodeProcessor';
+import { EmptyLinesProcessor } from '../remover/emptyLinesProcessor';
 import { applyProcessorToWorkspace } from '../remover/cleanerEngine';
 
 const commentProcessor = new CommentProcessor();
 const deadCodeProcessor = new DeadCodeProcessor();
+const emptyLinesProcessor = new EmptyLinesProcessor();
 
 export async function removeCommentsWorkspace() {
 	const settings = getSettings();
@@ -19,4 +21,10 @@ export async function removeDeadCodeWorkspace() {
 	const settings = getSettings();
 	const files = await scanWorkspace(settings.ignore);
 	await applyProcessorToWorkspace(deadCodeProcessor, settings, files, getLanguageByExtension, showPreview, showStatistics);
+}
+
+export async function removeEmptyLinesWorkspace() {
+	const settings = getSettings();
+	const files = await scanWorkspace(settings.ignore);
+	await applyProcessorToWorkspace(emptyLinesProcessor, settings, files, getLanguageByExtension, showPreview, showStatistics);
 }
