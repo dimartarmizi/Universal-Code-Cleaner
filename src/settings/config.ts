@@ -5,6 +5,13 @@ export interface CommentRemoverSettings {
 	keep: string[];
 	preview: boolean;
 	autoSave: boolean;
+	consoleLogs: {
+		keepError: boolean;
+		keepWarn: boolean;
+	};
+	emptyLines: {
+		maxConsecutive: number;
+	};
 }
 
 export function getSettings(): CommentRemoverSettings {
@@ -13,6 +20,14 @@ export function getSettings(): CommentRemoverSettings {
 		ignore: config.get<string[]>('ignore') || [],
 		keep: config.get<string[]>('keep') || [],
 		preview: config.get<boolean>('preview') !== false,
-		autoSave: config.get<boolean>('autoSave') !== false
+		autoSave: config.get<boolean>('autoSave') !== false,
+		consoleLogs: {
+			keepError: config.get<boolean>('consoleLogs.keepError') !== false,
+			keepWarn: config.get<boolean>('consoleLogs.keepWarn') === true
+		},
+		emptyLines: {
+			maxConsecutive: config.get<number>('emptyLines.maxConsecutive') ?? 1
+		}
 	};
 }
+

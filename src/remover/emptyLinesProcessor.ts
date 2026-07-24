@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { CodeCleanerProcessor } from './IProcessor';
+import { getSettings } from '../settings/config';
 
 export class EmptyLinesProcessor implements CodeCleanerProcessor {
 	name = 'EmptyLines';
@@ -7,6 +8,8 @@ export class EmptyLinesProcessor implements CodeCleanerProcessor {
 	async scan(document: vscode.TextDocument): Promise<vscode.Range[]> {
 		const ranges: vscode.Range[] = [];
 		const lineCount = document.lineCount;
+		const settings = getSettings();
+		const maxAllowed = settings.emptyLines.maxConsecutive;
 		let consecutiveEmptyCount = 0;
 
 		for (let i = 0; i < lineCount; i++) {
@@ -36,7 +39,7 @@ export class EmptyLinesProcessor implements CodeCleanerProcessor {
 					}
 				}
 
-				if (consecutiveEmptyCount > 1 || isAfterBlockOpen || isBeforeBlockClose) {
+				if (consecutiveEmptyCount > maxAllowed || isAfterBlockOpen || isBeforeBlockClose) {
 					const startPos = new vscode.Position(i, 0);
 					const endPos = i < lineCount - 1
 						? new vscode.Position(i + 1, 0)

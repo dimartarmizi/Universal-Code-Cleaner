@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { CodeCleanerProcessor } from './IProcessor';
+import { getSettings } from '../settings/config';
 
 export class ConsoleLogProcessor implements CodeCleanerProcessor {
 	readonly name = 'ConsoleLog';
@@ -7,8 +8,17 @@ export class ConsoleLogProcessor implements CodeCleanerProcessor {
 	async scan(document: vscode.TextDocument): Promise<vscode.Range[]> {
 		const text = document.getText();
 		const ranges: vscode.Range[] = [];
+		const settings = getSettings();
 
-		const consolePattern = /\bconsole\s*\.\s*(log|debug|warn|info|trace|dir)\s*\(/g;
+		const methods = ['log', 'debug', 'info', 'trace', 'dir'];
+		if (!settings.consoleLogs.keepWarn) {
+			methods.push('warn');
+		}
+		if (!settings.consoleLogs.keepError) {
+			methods.push('error');
+		}
+
+		const consolePattern = new RegExp(`\\bconsole\\s*\\.\\s*(${methods.join('|')})\\s*\\(`, 'g');
 
 		let match;
 		while ((match = consolePattern.exec(text)) !== null) {

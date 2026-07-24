@@ -76,7 +76,10 @@
             "**/build/**",
             "**/.git/**"
           ],
-          "description": "Glob patterns to ignore."
+          "description": "Glob patterns to ignore.",
+          "items": {
+            "type": "string"
+          }
         },
         "codeCleaner.keep": {
           "type": "array",
@@ -86,7 +89,10 @@
             "eslint-disable",
             "prettier-ignore"
           ],
-          "description": "Keywords in comments to preserve (case-insensitive)."
+          "description": "Keywords in comments to preserve (case-insensitive).",
+          "items": {
+            "type": "string"
+          }
         },
         "codeCleaner.preview": {
           "type": "boolean",
@@ -97,6 +103,22 @@
           "type": "boolean",
           "default": true,
           "description": "Automatically save modified files."
+        },
+        "codeCleaner.consoleLogs.keepError": {
+          "type": "boolean",
+          "default": true,
+          "description": "Preserve console.error statements when cleaning console logs."
+        },
+        "codeCleaner.consoleLogs.keepWarn": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preserve console.warn statements when cleaning console logs."
+        },
+        "codeCleaner.emptyLines.maxConsecutive": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 0,
+          "description": "Maximum consecutive empty lines allowed in document."
         }
       }
     }
