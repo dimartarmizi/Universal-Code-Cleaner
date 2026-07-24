@@ -1,7 +1,7 @@
 {
-  "name": "universal-comment-remover",
-  "displayName": "Universal Comment Remover",
-  "description": "Remove comments safely from an entire workspace with preview, backup, and multi-language support.",
+  "name": "universal-code-cleaner",
+  "displayName": "Universal Code Cleaner",
+  "description": "Remove comments and clean unused code safely from an entire workspace.",
   "version": "1.0.0",
   "publisher": "antigravity",
   "engines": {
@@ -15,18 +15,26 @@
   "contributes": {
     "commands": [
       {
-        "command": "commentRemover.removeCurrentFile",
-        "title": "Remove Comments: Current File"
+        "command": "codeCleaner.removeCommentsCurrentFile",
+        "title": "Clean Code: Remove Comments from Current File"
       },
       {
-        "command": "commentRemover.removeWorkspace",
-        "title": "Remove Comments: Workspace"
+        "command": "codeCleaner.removeCommentsWorkspace",
+        "title": "Clean Code: Remove Comments from Workspace"
+      },
+      {
+        "command": "codeCleaner.removeDeadCodeCurrentFile",
+        "title": "Clean Code: Remove Dead Code from Current File"
+      },
+      {
+        "command": "codeCleaner.removeDeadCodeWorkspace",
+        "title": "Clean Code: Remove Dead Code from Workspace"
       }
     ],
     "configuration": {
-      "title": "Universal Comment Remover",
+      "title": "Universal Code Cleaner",
       "properties": {
-        "commentRemover.ignore": {
+        "codeCleaner.ignore": {
           "type": "array",
           "default": [
             "**/node_modules/**",
@@ -37,7 +45,7 @@
           ],
           "description": "Glob patterns to ignore."
         },
-        "commentRemover.keep": {
+        "codeCleaner.keep": {
           "type": "array",
           "default": [
             "license",
@@ -47,12 +55,12 @@
           ],
           "description": "Keywords in comments to preserve (case-insensitive)."
         },
-        "commentRemover.preview": {
+        "codeCleaner.preview": {
           "type": "boolean",
           "default": true,
-          "description": "Show confirmation/preview dialog before removing comments."
+          "description": "Show confirmation/preview dialog before cleaning."
         },
-        "commentRemover.autoSave": {
+        "codeCleaner.autoSave": {
           "type": "boolean",
           "default": true,
           "description": "Automatically save modified files."

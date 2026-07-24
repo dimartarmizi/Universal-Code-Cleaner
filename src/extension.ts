@@ -1,25 +1,48 @@
 import * as vscode from 'vscode';
-import { removeCurrentFile, removeWorkspace } from './commands/removeWorkspace';
+import {
+	removeCommentsCurrentFile,
+	removeDeadCodeCurrentFile
+} from './commands/cleanCurrentFile';
+import {
+	removeCommentsWorkspace,
+	removeDeadCodeWorkspace
+} from './commands/cleanWorkspace';
 
 export function activate(context: vscode.ExtensionContext) {
-  const disposableRemoveCurrent = vscode.commands.registerCommand(
-    'commentRemover.removeCurrentFile',
-    async () => {
-      await removeCurrentFile();
-    }
-  );
+	const disposableRemoveCommentsCurrent = vscode.commands.registerCommand(
+		'codeCleaner.removeCommentsCurrentFile',
+		async () => {
+			await removeCommentsCurrentFile();
+		}
+	);
 
-  const disposableRemoveWorkspace = vscode.commands.registerCommand(
-    'commentRemover.removeWorkspace',
-    async () => {
-      await removeWorkspace();
-    }
-  );
+	const disposableRemoveCommentsWorkspace = vscode.commands.registerCommand(
+		'codeCleaner.removeCommentsWorkspace',
+		async () => {
+			await removeCommentsWorkspace();
+		}
+	);
 
-  context.subscriptions.push(
-    disposableRemoveCurrent,
-    disposableRemoveWorkspace
-  );
+	const disposableRemoveDeadCodeCurrent = vscode.commands.registerCommand(
+		'codeCleaner.removeDeadCodeCurrentFile',
+		async () => {
+			await removeDeadCodeCurrentFile();
+		}
+	);
+
+	const disposableRemoveDeadCodeWorkspace = vscode.commands.registerCommand(
+		'codeCleaner.removeDeadCodeWorkspace',
+		async () => {
+			await removeDeadCodeWorkspace();
+		}
+	);
+
+	context.subscriptions.push(
+		disposableRemoveCommentsCurrent,
+		disposableRemoveCommentsWorkspace,
+		disposableRemoveDeadCodeCurrent,
+		disposableRemoveDeadCodeWorkspace
+	);
 }
 
-export function deactivate() {}
+export function deactivate() { }
