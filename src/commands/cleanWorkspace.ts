@@ -6,12 +6,14 @@ import { CommentProcessor } from '../remover/commentProcessor';
 import { DeadCodeProcessor } from '../remover/deadCodeProcessor';
 import { EmptyLinesProcessor } from '../remover/emptyLinesProcessor';
 import { TrailingSpacesProcessor } from '../remover/trailingSpacesProcessor';
+import { ConsoleLogProcessor } from '../remover/consoleLogProcessor';
 import { applyProcessorToWorkspace } from '../remover/cleanerEngine';
 
 const commentProcessor = new CommentProcessor();
 const deadCodeProcessor = new DeadCodeProcessor();
 const emptyLinesProcessor = new EmptyLinesProcessor();
 const trailingSpacesProcessor = new TrailingSpacesProcessor();
+const consoleLogProcessor = new ConsoleLogProcessor();
 
 export async function removeCommentsWorkspace() {
 	const settings = getSettings();
@@ -36,3 +38,10 @@ export async function removeTrailingSpacesWorkspace() {
 	const files = await scanWorkspace(settings.ignore);
 	await applyProcessorToWorkspace(trailingSpacesProcessor, settings, files, getLanguageByExtension, showPreview, showStatistics);
 }
+
+export async function removeConsoleLogsWorkspace() {
+	const settings = getSettings();
+	const files = await scanWorkspace(settings.ignore);
+	await applyProcessorToWorkspace(consoleLogProcessor, settings, files, getLanguageByExtension, showPreview, showStatistics);
+}
+

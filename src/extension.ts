@@ -3,13 +3,15 @@ import {
 	removeCommentsCurrentFile,
 	removeDeadCodeCurrentFile,
 	removeEmptyLinesCurrentFile,
-	removeTrailingSpacesCurrentFile
+	removeTrailingSpacesCurrentFile,
+	removeConsoleLogsCurrentFile
 } from './commands/cleanCurrentFile';
 import {
 	removeCommentsWorkspace,
 	removeDeadCodeWorkspace,
 	removeEmptyLinesWorkspace,
-	removeTrailingSpacesWorkspace
+	removeTrailingSpacesWorkspace,
+	removeConsoleLogsWorkspace
 } from './commands/cleanWorkspace';
 import { removeEmptyFilesWorkspace } from './commands/cleanEmptyFiles';
 import { removeEmptyFoldersWorkspace } from './commands/cleanEmptyFolders';
@@ -71,6 +73,20 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	);
 
+	const disposableRemoveConsoleLogsCurrent = vscode.commands.registerCommand(
+		'codeCleaner.removeConsoleLogsCurrentFile',
+		async () => {
+			await removeConsoleLogsCurrentFile();
+		}
+	);
+
+	const disposableRemoveConsoleLogsWorkspace = vscode.commands.registerCommand(
+		'codeCleaner.removeConsoleLogsWorkspace',
+		async () => {
+			await removeConsoleLogsWorkspace();
+		}
+	);
+
 	const disposableRemoveEmptyFilesWorkspace = vscode.commands.registerCommand(
 		'codeCleaner.removeEmptyFilesWorkspace',
 		async () => {
@@ -94,6 +110,8 @@ export function activate(context: vscode.ExtensionContext) {
 		disposableRemoveEmptyLinesWorkspace,
 		disposableRemoveTrailingSpacesCurrent,
 		disposableRemoveTrailingSpacesWorkspace,
+		disposableRemoveConsoleLogsCurrent,
+		disposableRemoveConsoleLogsWorkspace,
 		disposableRemoveEmptyFilesWorkspace,
 		disposableRemoveEmptyFoldersWorkspace
 	);

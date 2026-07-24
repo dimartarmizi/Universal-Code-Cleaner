@@ -3,7 +3,8 @@
   "displayName": "Universal Code Cleaner",
   "description": "Remove comments and clean unused code safely from an entire workspace.",
   "version": "1.0.0",
-  "publisher": "antigravity",
+  "publisher": "dimartarmizi",
+  "author": "Dimar Tarmizi",
   "engines": {
     "vscode": "^1.80.0"
   },
@@ -45,6 +46,14 @@
       {
         "command": "codeCleaner.removeTrailingSpacesWorkspace",
         "title": "Clean Code: Remove Trailing Spaces from Workspace"
+      },
+      {
+        "command": "codeCleaner.removeConsoleLogsCurrentFile",
+        "title": "Clean Code: Remove Console Logs from Current File"
+      },
+      {
+        "command": "codeCleaner.removeConsoleLogsWorkspace",
+        "title": "Clean Code: Remove Console Logs from Workspace"
       },
       {
         "command": "codeCleaner.removeEmptyFilesWorkspace",
@@ -95,21 +104,11 @@
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile && npm run lint",
-    "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
-    "@types/mocha": "^10.0.10",
     "@types/node": "18.x",
     "@types/vscode": "^1.80.0",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
-    "@vscode/test-electron": "^3.0.0",
-    "eslint": "^8.45.0",
-    "glob": "^13.0.6",
-    "mocha": "^11.7.6",
     "typescript": "^5.1.6"
   },
   "dependencies": {
