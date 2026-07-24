@@ -1,0 +1,86 @@
+{
+  "name": "universal-comment-remover",
+  "displayName": "Universal Comment Remover",
+  "description": "Remove comments safely from an entire workspace with preview, backup, and multi-language support.",
+  "version": "1.0.0",
+  "publisher": "antigravity",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "commentRemover.removeCurrentFile",
+        "title": "Remove Comments: Current File"
+      },
+      {
+        "command": "commentRemover.removeWorkspace",
+        "title": "Remove Comments: Workspace"
+      }
+    ],
+    "configuration": {
+      "title": "Universal Comment Remover",
+      "properties": {
+        "commentRemover.ignore": {
+          "type": "array",
+          "default": [
+            "**/node_modules/**",
+            "**/dist/**",
+            "**/vendor/**",
+            "**/build/**",
+            "**/.git/**"
+          ],
+          "description": "Glob patterns to ignore."
+        },
+        "commentRemover.keep": {
+          "type": "array",
+          "default": [
+            "license",
+            "ts-ignore",
+            "eslint-disable",
+            "prettier-ignore"
+          ],
+          "description": "Keywords in comments to preserve (case-insensitive)."
+        },
+        "commentRemover.preview": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show confirmation/preview dialog before removing comments."
+        },
+        "commentRemover.autoSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically save modified files."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "18.x",
+    "@types/vscode": "^1.80.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@vscode/test-electron": "^3.0.0",
+    "eslint": "^8.45.0",
+    "glob": "^13.0.6",
+    "mocha": "^11.7.6",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "fast-glob": "^3.3.1"
+  }
+}
