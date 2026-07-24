@@ -37,6 +37,14 @@
       {
         "command": "codeCleaner.removeEmptyLinesWorkspace",
         "title": "Clean Code: Remove Empty Lines from Workspace"
+      },
+      {
+        "command": "codeCleaner.removeTrailingSpacesCurrentFile",
+        "title": "Clean Code: Remove Trailing Spaces from Current File"
+      },
+      {
+        "command": "codeCleaner.removeTrailingSpacesWorkspace",
+        "title": "Clean Code: Remove Trailing Spaces from Workspace"
       }
     ],
     "configuration": {

@@ -2,12 +2,14 @@ import * as vscode from 'vscode';
 import {
 	removeCommentsCurrentFile,
 	removeDeadCodeCurrentFile,
-	removeEmptyLinesCurrentFile
+	removeEmptyLinesCurrentFile,
+	removeTrailingSpacesCurrentFile
 } from './commands/cleanCurrentFile';
 import {
 	removeCommentsWorkspace,
 	removeDeadCodeWorkspace,
-	removeEmptyLinesWorkspace
+	removeEmptyLinesWorkspace,
+	removeTrailingSpacesWorkspace
 } from './commands/cleanWorkspace';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -53,13 +55,29 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	);
 
+	const disposableRemoveTrailingSpacesCurrent = vscode.commands.registerCommand(
+		'codeCleaner.removeTrailingSpacesCurrentFile',
+		async () => {
+			await removeTrailingSpacesCurrentFile();
+		}
+	);
+
+	const disposableRemoveTrailingSpacesWorkspace = vscode.commands.registerCommand(
+		'codeCleaner.removeTrailingSpacesWorkspace',
+		async () => {
+			await removeTrailingSpacesWorkspace();
+		}
+	);
+
 	context.subscriptions.push(
 		disposableRemoveCommentsCurrent,
 		disposableRemoveCommentsWorkspace,
 		disposableRemoveDeadCodeCurrent,
 		disposableRemoveDeadCodeWorkspace,
 		disposableRemoveEmptyLinesCurrent,
-		disposableRemoveEmptyLinesWorkspace
+		disposableRemoveEmptyLinesWorkspace,
+		disposableRemoveTrailingSpacesCurrent,
+		disposableRemoveTrailingSpacesWorkspace
 	);
 }
 

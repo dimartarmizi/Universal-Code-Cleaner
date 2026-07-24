@@ -4,11 +4,13 @@ import { showPreview, showStatistics } from '../preview/diffPreview';
 import { CommentProcessor } from '../remover/commentProcessor';
 import { DeadCodeProcessor } from '../remover/deadCodeProcessor';
 import { EmptyLinesProcessor } from '../remover/emptyLinesProcessor';
+import { TrailingSpacesProcessor } from '../remover/trailingSpacesProcessor';
 import { applyProcessorToEditor } from '../remover/cleanerEngine';
 
 const commentProcessor = new CommentProcessor();
 const deadCodeProcessor = new DeadCodeProcessor();
 const emptyLinesProcessor = new EmptyLinesProcessor();
+const trailingSpacesProcessor = new TrailingSpacesProcessor();
 
 export async function removeCommentsCurrentFile() {
 	const editor = vscode.window.activeTextEditor;
@@ -38,4 +40,14 @@ export async function removeEmptyLinesCurrentFile() {
 	}
 	const settings = getSettings();
 	await applyProcessorToEditor(editor, emptyLinesProcessor, settings, showPreview, showStatistics);
+}
+
+export async function removeTrailingSpacesCurrentFile() {
+	const editor = vscode.window.activeTextEditor;
+	if (!editor) {
+		vscode.window.showErrorMessage('No active text editor found.');
+		return;
+	}
+	const settings = getSettings();
+	await applyProcessorToEditor(editor, trailingSpacesProcessor, settings, showPreview, showStatistics);
 }
