@@ -56,6 +56,14 @@
         "title": "Clean Code: Remove Console Logs from Workspace"
       },
       {
+        "command": "codeCleaner.sortImportsCurrentFile",
+        "title": "Clean Code: Sort Imports in Current File"
+      },
+      {
+        "command": "codeCleaner.sortImportsWorkspace",
+        "title": "Clean Code: Sort Imports in Workspace"
+      },
+      {
         "command": "codeCleaner.removeEmptyFilesWorkspace",
         "title": "Clean Code: Remove Empty Files from Workspace"
       },

@@ -13,12 +13,17 @@ export async function applyProcessorToEditor(editor: vscode.TextEditor, processo
 		'TrailingSpaces': 'trailing spaces',
 		'EmptyFiles': 'empty files',
 		'EmptyFolders': 'empty folders',
-		'ConsoleLog': 'console logs'
+		'ConsoleLog': 'console logs',
+		'SortImports': 'sorted imports'
+	};
+	const verbMap: Record<string, string> = {
+		'SortImports': 'sort'
 	};
 	const actionName = nameMap[processor.name] || processor.name.toLowerCase();
+	const actionVerb = verbMap[processor.name] || 'clean';
 
 	if (ranges.length === 0) {
-		vscode.window.showInformationMessage(`No ${actionName} found to clean in this file.`);
+		vscode.window.showInformationMessage(`No ${actionName} found to ${actionVerb} in this file.`);
 		return;
 	}
 
@@ -28,7 +33,7 @@ export async function applyProcessorToEditor(editor: vscode.TextEditor, processo
 			languageId: document.languageId,
 			commentCount: ranges.length,
 			commentsSize: 0
-		}], actionName, 'clean');
+		}], actionName, actionVerb);
 		if (!confirm) {
 			return;
 		}
@@ -36,14 +41,18 @@ export async function applyProcessorToEditor(editor: vscode.TextEditor, processo
 
 	const startTime = Date.now();
 	await editor.edit(editBuilder => {
-		const sorted = [...ranges].sort((a, b) => {
-			const aStart = document.offsetAt(a.start);
-			const bStart = document.offsetAt(b.start);
-			return bStart - aStart;
-		});
+		if (processor.applyCustomEdit) {
+			processor.applyCustomEdit(editBuilder, document);
+		} else {
+			const sorted = [...ranges].sort((a, b) => {
+				const aStart = document.offsetAt(a.start);
+				const bStart = document.offsetAt(b.start);
+				return bStart - aStart;
+			});
 
-		for (const range of sorted) {
-			editBuilder.delete(range);
+			for (const range of sorted) {
+				editBuilder.delete(range);
+			}
 		}
 	});
 
@@ -52,7 +61,7 @@ export async function applyProcessorToEditor(editor: vscode.TextEditor, processo
 	}
 
 	const duration = (Date.now() - startTime) / 1000;
-	showStatistics(1, ranges.length, duration, actionName);
+	showStatistics(1, ranges.length, duration, actionName, actionVerb);
 }
 
 export async function applyProcessorToWorkspace(processor: CodeCleanerProcessor, settings: any, files: string[], getLanguageByExtension: any, showPreview: any, showStatistics: any) {
@@ -66,9 +75,14 @@ export async function applyProcessorToWorkspace(processor: CodeCleanerProcessor,
 		'TrailingSpaces': 'trailing spaces',
 		'EmptyFiles': 'empty files',
 		'EmptyFolders': 'empty folders',
-		'ConsoleLog': 'console logs'
+		'ConsoleLog': 'console logs',
+		'SortImports': 'sorted imports'
+	};
+	const verbMap: Record<string, string> = {
+		'SortImports': 'sort'
 	};
 	const actionName = nameMap[processor.name] || processor.name.toLowerCase();
+	const actionVerb = verbMap[processor.name] || 'clean';
 
 	await vscode.window.withProgress({
 		location: vscode.ProgressLocation.Notification,
@@ -109,11 +123,11 @@ export async function applyProcessorToWorkspace(processor: CodeCleanerProcessor,
 	});
 
 	if (scanResults.length === 0) {
-		vscode.window.showInformationMessage(`No ${actionName} found to clean in the workspace.`);
+		vscode.window.showInformationMessage(`No ${actionName} found to ${actionVerb} in the workspace.`);
 		return;
 	}
 
-	const proceed = await showPreview(scanResults, actionName, 'clean');
+	const proceed = await showPreview(scanResults, actionName, actionVerb);
 	if (!proceed) {
 		return;
 	}
@@ -122,9 +136,10 @@ export async function applyProcessorToWorkspace(processor: CodeCleanerProcessor,
 	let modifiedCount = 0;
 	let removedCount = 0;
 
+	const progressTitle = actionVerb === 'sort' ? 'Sorting' : 'Cleaning';
 	await vscode.window.withProgress({
 		location: vscode.ProgressLocation.Notification,
-		title: `Cleaning ${actionName}...`,
+		title: `${progressTitle} ${actionName}...`,
 		cancellable: false
 	}, async (progress) => {
 		let index = 0;
@@ -136,14 +151,18 @@ export async function applyProcessorToWorkspace(processor: CodeCleanerProcessor,
 				}
 
 				const edit = new vscode.WorkspaceEdit();
-				const sorted = [...info.ranges].sort((a, b) => {
-					const aStart = doc!.offsetAt(a.start);
-					const bStart = doc!.offsetAt(b.start);
-					return bStart - aStart;
-				});
+				if (processor.applyCustomWorkspaceEdit) {
+					processor.applyCustomWorkspaceEdit(edit, doc);
+				} else {
+					const sorted = [...info.ranges].sort((a, b) => {
+						const aStart = doc!.offsetAt(a.start);
+						const bStart = doc!.offsetAt(b.start);
+						return bStart - aStart;
+					});
 
-				for (const range of sorted) {
-					edit.delete(doc.uri, range);
+					for (const range of sorted) {
+						edit.delete(doc.uri, range);
+					}
 				}
 
 				await vscode.workspace.applyEdit(edit);
@@ -170,7 +189,7 @@ export async function applyProcessorToWorkspace(processor: CodeCleanerProcessor,
 					modifiedCount++;
 					removedCount += info.ranges.length;
 				} catch (fsErr) {
-					vscode.window.showErrorMessage(`Failed to clean file: ${file}`);
+					vscode.window.showErrorMessage(`Failed to ${actionVerb} file: ${file}`);
 				}
 			}
 			index++;
@@ -179,5 +198,5 @@ export async function applyProcessorToWorkspace(processor: CodeCleanerProcessor,
 	});
 
 	const duration = (Date.now() - startTime) / 1000;
-	showStatistics(modifiedCount, removedCount, duration, actionName);
+	showStatistics(modifiedCount, scanResults.length, duration, actionName, actionVerb);
 }

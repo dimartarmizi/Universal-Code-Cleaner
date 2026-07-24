@@ -7,9 +7,10 @@ export interface ScanResult {
 	commentsSize: number;
 }
 
-export function showStatistics(modifiedFiles: number, totalItemsRemoved: number, durationSeconds: number, actionName: string = 'Items'): void {
+export function showStatistics(modifiedFiles: number, totalItemsRemoved: number, durationSeconds: number, actionName: string = 'Items', actionVerb: string = 'clean'): void {
+	const pastTense = actionVerb === 'sort' ? 'sorted' : 'cleaned';
 	vscode.window.showInformationMessage(
-		`Finished!\nFiles modified: ${modifiedFiles}\n${actionName} cleaned: ${totalItemsRemoved}\nElapsed: ${durationSeconds.toFixed(1)} seconds`
+		`Finished!\nFiles modified: ${modifiedFiles}\n${actionName} ${pastTense}: ${totalItemsRemoved}\nElapsed: ${durationSeconds.toFixed(1)} seconds`
 	);
 }
 
@@ -40,13 +41,15 @@ export async function showPreview(scanResults: ScanResult[], actionName: string 
 		message += `${lang.toUpperCase()}: ${count}\n`;
 	}
 
-	message += `\nTotal: ${totalItems} ${actionName} across ${totalFiles} files.\n\nDo you want to proceed with ${actionVerb}ing ${actionName}?`;
+	message += `\nTotal: ${totalItems} ${actionName} across ${totalFiles} files.\n\nDo you want to ${actionVerb} ${actionName}?`;
+
+	const buttonLabel = actionVerb === 'sort' ? 'Sort' : 'Clean';
 
 	const option = await vscode.window.showWarningMessage(
 		message,
 		{ modal: true },
-		'Clean'
+		buttonLabel
 	);
 
-	return option === 'Clean';
+	return option === buttonLabel;
 }

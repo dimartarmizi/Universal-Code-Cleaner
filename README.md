@@ -28,7 +28,11 @@ Performs safe cleanup of browser/Node console commands:
 * **Removes**: `console.log`, `console.debug`, `console.warn`, `console.info`, `console.trace`, and `console.dir`.
 * **Retains**: `console.error` is kept intact as it is vital for production error logging and telemetry.
 
-### 6. 📁 Workspace Directory Sanitization
+### 6. 🗂️ Sort Imports (Universal)
+Organizes and sorts your imports alphabetically, removing duplicates and cleaning empty lines inside the import block.
+* **Universal Language Support**: Detects and sorts imports across JavaScript, TypeScript, Python (`import` & `from`), Go (`import`), Rust (`use`), PHP (`use`), CSS/SCSS (`@import`), and C/C++ (`#include`).
+
+### 7. 📁 Workspace Directory Sanitization
 * **Remove Empty Files**: Safely deletes 0-byte or whitespace-only files.
 * **Remove Empty Folders**: Recursively traverses directory structures and removes empty folders from the deepest subdirectory upward, ensuring nested empty structures are fully cleared.
 
@@ -60,6 +64,7 @@ Open the **Command Palette** (`Ctrl+Shift+P` on Windows/Linux or `Cmd+Shift+P` o
 * `Clean Code: Remove Empty Lines from Current File`
 * `Clean Code: Remove Trailing Spaces from Current File`
 * `Clean Code: Remove Console Logs from Current File`
+* `Clean Code: Sort Imports in Current File`
 
 ### Workspace-Wide Commands
 * `Clean Code: Remove Comments from Workspace`
@@ -67,6 +72,7 @@ Open the **Command Palette** (`Ctrl+Shift+P` on Windows/Linux or `Cmd+Shift+P` o
 * `Clean Code: Remove Empty Lines from Workspace`
 * `Clean Code: Remove Trailing Spaces from Workspace`
 * `Clean Code: Remove Console Logs from Workspace`
+* `Clean Code: Sort Imports in Workspace`
 * `Clean Code: Remove Empty Files from Workspace`
 * `Clean Code: Remove Empty Folders from Workspace`
 
