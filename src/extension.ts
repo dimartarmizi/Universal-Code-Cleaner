@@ -11,6 +11,8 @@ import {
 	removeEmptyLinesWorkspace,
 	removeTrailingSpacesWorkspace
 } from './commands/cleanWorkspace';
+import { removeEmptyFilesWorkspace } from './commands/cleanEmptyFiles';
+import { removeEmptyFoldersWorkspace } from './commands/cleanEmptyFolders';
 
 export function activate(context: vscode.ExtensionContext) {
 	const disposableRemoveCommentsCurrent = vscode.commands.registerCommand(
@@ -69,6 +71,20 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	);
 
+	const disposableRemoveEmptyFilesWorkspace = vscode.commands.registerCommand(
+		'codeCleaner.removeEmptyFilesWorkspace',
+		async () => {
+			await removeEmptyFilesWorkspace();
+		}
+	);
+
+	const disposableRemoveEmptyFoldersWorkspace = vscode.commands.registerCommand(
+		'codeCleaner.removeEmptyFoldersWorkspace',
+		async () => {
+			await removeEmptyFoldersWorkspace();
+		}
+	);
+
 	context.subscriptions.push(
 		disposableRemoveCommentsCurrent,
 		disposableRemoveCommentsWorkspace,
@@ -77,7 +93,9 @@ export function activate(context: vscode.ExtensionContext) {
 		disposableRemoveEmptyLinesCurrent,
 		disposableRemoveEmptyLinesWorkspace,
 		disposableRemoveTrailingSpacesCurrent,
-		disposableRemoveTrailingSpacesWorkspace
+		disposableRemoveTrailingSpacesWorkspace,
+		disposableRemoveEmptyFilesWorkspace,
+		disposableRemoveEmptyFoldersWorkspace
 	);
 }
 

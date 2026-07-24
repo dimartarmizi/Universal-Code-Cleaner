@@ -1,0 +1,99 @@
+import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
+import { getSettings } from '../settings/config';
+import { showPreview, showStatistics } from '../preview/diffPreview';
+
+export async function removeEmptyFoldersWorkspace() {
+	const settings = getSettings();
+	const folders = vscode.workspace.workspaceFolders;
+	if (!folders || folders.length === 0) {
+		return;
+	}
+
+	const emptyFolders: string[] = [];
+
+	function scanDirs(dir: string) {
+		try {
+			const relPath = vscode.workspace.asRelativePath(dir);
+			if (settings.ignore.some(pat => {
+				const globPattern = pat.replace(/\*\*/g, '.*');
+				return new RegExp(globPattern).test(relPath) || new RegExp(globPattern).test(dir);
+			})) {
+				return;
+			}
+
+			const files = fs.readdirSync(dir);
+			if (files.length === 0) {
+				emptyFolders.push(dir);
+				return;
+			}
+
+			let subdirsOnlyEmpty = true;
+			for (const file of files) {
+				const fullPath = path.join(dir, file);
+				const stats = fs.statSync(fullPath);
+				if (stats.isDirectory()) {
+					scanDirs(fullPath);
+					if (fs.readdirSync(fullPath).length > 0) {
+						subdirsOnlyEmpty = false;
+					}
+				} else {
+					subdirsOnlyEmpty = false;
+				}
+			}
+
+			if (subdirsOnlyEmpty && fs.readdirSync(dir).length === 0) {
+				emptyFolders.push(dir);
+			}
+		} catch (e) {
+		}
+	}
+
+	for (const folder of folders) {
+		const rootPath = folder.uri.fsPath;
+		const items = fs.readdirSync(rootPath);
+		for (const item of items) {
+			const fullPath = path.join(rootPath, item);
+			if (fs.statSync(fullPath).isDirectory()) {
+				scanDirs(fullPath);
+			}
+		}
+	}
+
+	if (emptyFolders.length === 0) {
+		vscode.window.showInformationMessage('No empty folders found in the workspace.');
+		return;
+	}
+
+	const scanResults = emptyFolders.map(dir => ({
+		filePath: dir,
+		languageId: 'folder',
+		commentCount: 1,
+		commentsSize: 0
+	}));
+
+	const proceed = await showPreview(scanResults, 'empty folders', 'delete');
+	if (!proceed) {
+		return;
+	}
+
+	const startTime = Date.now();
+	let deletedCount = 0;
+
+	const sortedFolders = [...emptyFolders].sort((a, b) => b.length - a.length);
+
+	for (const dir of sortedFolders) {
+		try {
+			if (fs.existsSync(dir) && fs.readdirSync(dir).length === 0) {
+				fs.rmdirSync(dir);
+				deletedCount++;
+			}
+		} catch (err) {
+			vscode.window.showErrorMessage(`Failed to delete folder: ${dir}`);
+		}
+	}
+
+	const duration = (Date.now() - startTime) / 1000;
+	showStatistics(deletedCount, deletedCount, duration, 'empty folders');
+}

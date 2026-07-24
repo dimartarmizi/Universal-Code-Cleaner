@@ -10,7 +10,9 @@ export async function applyProcessorToEditor(editor: vscode.TextEditor, processo
 		'Comments': 'comments',
 		'DeadCode': 'dead code items',
 		'EmptyLines': 'empty lines',
-		'TrailingSpaces': 'trailing spaces'
+		'TrailingSpaces': 'trailing spaces',
+		'EmptyFiles': 'empty files',
+		'EmptyFolders': 'empty folders'
 	};
 	const actionName = nameMap[processor.name] || processor.name.toLowerCase();
 
@@ -60,7 +62,9 @@ export async function applyProcessorToWorkspace(processor: CodeCleanerProcessor,
 		'Comments': 'comments',
 		'DeadCode': 'dead code items',
 		'EmptyLines': 'empty lines',
-		'TrailingSpaces': 'trailing spaces'
+		'TrailingSpaces': 'trailing spaces',
+		'EmptyFiles': 'empty files',
+		'EmptyFolders': 'empty folders'
 	};
 	const actionName = nameMap[processor.name] || processor.name.toLowerCase();
 

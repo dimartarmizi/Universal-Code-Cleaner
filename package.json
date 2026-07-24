@@ -45,6 +45,14 @@
       {
         "command": "codeCleaner.removeTrailingSpacesWorkspace",
         "title": "Clean Code: Remove Trailing Spaces from Workspace"
+      },
+      {
+        "command": "codeCleaner.removeEmptyFilesWorkspace",
+        "title": "Clean Code: Remove Empty Files from Workspace"
+      },
+      {
+        "command": "codeCleaner.removeEmptyFoldersWorkspace",
+        "title": "Clean Code: Remove Empty Folders from Workspace"
       }
     ],
     "configuration": {
