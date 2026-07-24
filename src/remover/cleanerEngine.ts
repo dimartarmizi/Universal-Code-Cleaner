@@ -6,8 +6,15 @@ export async function applyProcessorToEditor(editor: vscode.TextEditor, processo
 	const document = editor.document;
 	const ranges = await processor.scan(document);
 
+	const nameMap: Record<string, string> = {
+		'Comments': 'comments',
+		'DeadCode': 'dead code items',
+		'EmptyLines': 'empty lines'
+	};
+	const actionName = nameMap[processor.name] || processor.name.toLowerCase();
+
 	if (ranges.length === 0) {
-		vscode.window.showInformationMessage(`No ${processor.name.toLowerCase()} found to clean in this file.`);
+		vscode.window.showInformationMessage(`No ${actionName} found to clean in this file.`);
 		return;
 	}
 
@@ -17,7 +24,7 @@ export async function applyProcessorToEditor(editor: vscode.TextEditor, processo
 			languageId: document.languageId,
 			commentCount: ranges.length,
 			commentsSize: 0
-		}]);
+		}], actionName, 'clean');
 		if (!confirm) {
 			return;
 		}
@@ -41,16 +48,23 @@ export async function applyProcessorToEditor(editor: vscode.TextEditor, processo
 	}
 
 	const duration = (Date.now() - startTime) / 1000;
-	showStatistics(1, ranges.length, duration);
+	showStatistics(1, ranges.length, duration, actionName);
 }
 
 export async function applyProcessorToWorkspace(processor: CodeCleanerProcessor, settings: any, files: string[], getLanguageByExtension: any, showPreview: any, showStatistics: any) {
 	const scanResults: any[] = [];
 	const fileContentsMap = new Map<string, { ranges: vscode.Range[] }>();
 
+	const nameMap: Record<string, string> = {
+		'Comments': 'comments',
+		'DeadCode': 'dead code items',
+		'EmptyLines': 'empty lines'
+	};
+	const actionName = nameMap[processor.name] || processor.name.toLowerCase();
+
 	await vscode.window.withProgress({
 		location: vscode.ProgressLocation.Notification,
-		title: `Scanning workspace for ${processor.name.toLowerCase()}...`,
+		title: `Scanning workspace for ${actionName}...`,
 		cancellable: true
 	}, async (progress, token) => {
 		for (let i = 0; i < files.length; i++) {
@@ -65,10 +79,8 @@ export async function applyProcessorToWorkspace(processor: CodeCleanerProcessor,
 
 			try {
 				let doc = vscode.workspace.textDocuments.find(d => d.fileName === file);
-				let openedDynamically = false;
 				if (!doc) {
 					doc = await vscode.workspace.openTextDocument(file);
-					openedDynamically = true;
 				}
 
 				const ranges = await processor.scan(doc);
@@ -89,11 +101,11 @@ export async function applyProcessorToWorkspace(processor: CodeCleanerProcessor,
 	});
 
 	if (scanResults.length === 0) {
-		vscode.window.showInformationMessage(`No ${processor.name.toLowerCase()} to remove in the workspace.`);
+		vscode.window.showInformationMessage(`No ${actionName} found to clean in the workspace.`);
 		return;
 	}
 
-	const proceed = await showPreview(scanResults);
+	const proceed = await showPreview(scanResults, actionName, 'clean');
 	if (!proceed) {
 		return;
 	}
@@ -104,7 +116,7 @@ export async function applyProcessorToWorkspace(processor: CodeCleanerProcessor,
 
 	await vscode.window.withProgress({
 		location: vscode.ProgressLocation.Notification,
-		title: `Removing ${processor.name.toLowerCase()}...`,
+		title: `Cleaning ${actionName}...`,
 		cancellable: false
 	}, async (progress) => {
 		let index = 0;
@@ -159,5 +171,5 @@ export async function applyProcessorToWorkspace(processor: CodeCleanerProcessor,
 	});
 
 	const duration = (Date.now() - startTime) / 1000;
-	showStatistics(modifiedCount, removedCount, duration);
+	showStatistics(modifiedCount, removedCount, duration, actionName);
 }

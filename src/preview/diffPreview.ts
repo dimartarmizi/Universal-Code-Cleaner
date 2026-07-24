@@ -7,18 +7,18 @@ export interface ScanResult {
 	commentsSize: number;
 }
 
-export function showStatistics(modifiedFiles: number, totalCommentsRemoved: number, durationSeconds: number): void {
+export function showStatistics(modifiedFiles: number, totalItemsRemoved: number, durationSeconds: number, actionName: string = 'Items'): void {
 	vscode.window.showInformationMessage(
-		`Finished!\nFiles modified: ${modifiedFiles}\nComments removed: ${totalCommentsRemoved}\nElapsed: ${durationSeconds.toFixed(1)} seconds`
+		`Finished!\nFiles modified: ${modifiedFiles}\n${actionName} cleaned: ${totalItemsRemoved}\nElapsed: ${durationSeconds.toFixed(1)} seconds`
 	);
 }
 
-export async function showPreview(scanResults: ScanResult[]): Promise<boolean> {
-	const totalComments = scanResults.reduce((sum, r) => sum + r.commentCount, 0);
+export async function showPreview(scanResults: ScanResult[], actionName: string = 'items', actionVerb: string = 'clean'): Promise<boolean> {
+	const totalItems = scanResults.reduce((sum, r) => sum + r.commentCount, 0);
 	const totalFiles = scanResults.length;
 
-	if (totalComments === 0) {
-		vscode.window.showInformationMessage('No comments found to remove.');
+	if (totalItems === 0) {
+		vscode.window.showInformationMessage(`No ${actionName} found to ${actionVerb}.`);
 		return false;
 	}
 
@@ -29,24 +29,24 @@ export async function showPreview(scanResults: ScanResult[]): Promise<boolean> {
 
 	let message = `Files:\n`;
 	for (const r of scanResults.slice(0, 10)) {
-		message += `- ${vscode.workspace.asRelativePath(r.filePath)} (${r.commentCount} comments)\n`;
+		message += `- ${vscode.workspace.asRelativePath(r.filePath)} (${r.commentCount} ${actionName})\n`;
 	}
 	if (scanResults.length > 10) {
 		message += `- ... and ${scanResults.length - 10} more files\n`;
 	}
 
-	message += `\nComments Found:\n`;
+	message += `\n${actionName.charAt(0).toUpperCase() + actionName.slice(1)} Found:\n`;
 	for (const [lang, count] of Object.entries(langStats)) {
 		message += `${lang.toUpperCase()}: ${count}\n`;
 	}
 
-	message += `\nTotal: ${totalComments} comments across ${totalFiles} files.\n\nDo you want to proceed with removing comments?`;
+	message += `\nTotal: ${totalItems} ${actionName} across ${totalFiles} files.\n\nDo you want to proceed with ${actionVerb}ing ${actionName}?`;
 
 	const option = await vscode.window.showWarningMessage(
 		message,
 		{ modal: true },
-		'Remove'
+		'Clean'
 	);
 
-	return option === 'Remove';
+	return option === 'Clean';
 }
