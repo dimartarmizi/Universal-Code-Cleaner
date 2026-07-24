@@ -21,7 +21,6 @@ export function removeCommentsFromText(text: string, commentsToRemove: CommentSp
     let start = comment.start;
     let end = comment.end;
 
-    // Bersihkan whitespace sebelum komentar satu baris
     while (start > 0 && (result[start - 1] === ' ' || result[start - 1] === '\t')) {
       start--;
     }

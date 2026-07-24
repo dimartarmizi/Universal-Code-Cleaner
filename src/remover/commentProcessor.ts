@@ -25,12 +25,10 @@ export class CommentProcessor implements CodeCleanerProcessor {
 			let startOffset = comment.start;
 			let endOffset = comment.end;
 
-			// Bersihkan whitespace sebelum komentar
 			while (startOffset > 0 && (text[startOffset - 1] === ' ' || text[startOffset - 1] === '\t')) {
 				startOffset--;
 			}
 
-			// Jika di baris tersendiri, bersihkan newline sesudahnya
 			if ((startOffset === 0 || text[startOffset - 1] === '\n' || text[startOffset - 1] === '\r') &&
 				(endOffset === text.length || text[endOffset] === '\n' || text[endOffset] === '\r')) {
 				if (endOffset < text.length) {

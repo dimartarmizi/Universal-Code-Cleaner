@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { getLanguageByExtension } from '../language/languageRegistry';
 import { getSettings } from '../settings/config';
 import { showPreview, showStatistics } from '../preview/diffPreview';
 import { CommentProcessor } from '../remover/commentProcessor';

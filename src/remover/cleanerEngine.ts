@@ -24,7 +24,6 @@ export async function applyProcessorToEditor(editor: vscode.TextEditor, processo
 
 	const startTime = Date.now();
 	await editor.edit(editBuilder => {
-		// Urutkan dari offset paling belakang agar tidak merusak offset range sebelumnya
 		const sorted = [...ranges].sort((a, b) => {
 			const aStart = document.offsetAt(a.start);
 			const bStart = document.offsetAt(b.start);
@@ -80,7 +79,6 @@ export async function applyProcessorToWorkspace(processor: CodeCleanerProcessor,
 					fileContentsMap.set(file, { ranges, doc });
 				}
 			} catch (err) {
-				// Ignore
 			}
 
 			progress.report({ increment: (1 / files.length) * 100, message: `${i + 1}/${files.length} files` });

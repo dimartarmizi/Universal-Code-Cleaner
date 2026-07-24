@@ -28,17 +28,13 @@ export function cleanUnusedCodeFromText(text: string, document: vscode.TextDocum
 		let start = startOffset;
 		let end = endOffset;
 
-		// Untuk baris import / variabel yang tidak terpakai, mari kita hapus satu baris penuh jika memungkinkan
 		const startPos = range.start;
-		const endPos = range.end;
 
-		// Cari tahu apakah seluruh baris berisi dead code ini
 		const lineText = document.lineAt(startPos.line).text;
 		const trimmedLine = lineText.trim();
 		const tokenText = text.substring(startOffset, endOffset).trim();
 
 		if (trimmedLine === tokenText || trimmedLine === tokenText + ';' || trimmedLine === 'const ' + tokenText || trimmedLine === 'let ' + tokenText || trimmedLine === 'var ' + tokenText) {
-			// Hapus satu baris penuh beserta baris barunya
 			const lineStartOffset = document.offsetAt(new vscode.Position(startPos.line, 0));
 			const nextLineStartOffset = startPos.line < document.lineCount - 1
 				? document.offsetAt(new vscode.Position(startPos.line + 1, 0))
