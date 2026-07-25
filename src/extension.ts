@@ -5,7 +5,8 @@ import {
 	removeEmptyLinesCurrentFile,
 	removeTrailingSpacesCurrentFile,
 	removeConsoleLogsCurrentFile,
-	sortImportsCurrentFile
+	sortImportsCurrentFile,
+	convertIndentCurrentFile
 } from './commands/cleanCurrentFile';
 import {
 	removeCommentsWorkspace,
@@ -13,7 +14,8 @@ import {
 	removeEmptyLinesWorkspace,
 	removeTrailingSpacesWorkspace,
 	removeConsoleLogsWorkspace,
-	sortImportsWorkspace
+	sortImportsWorkspace,
+	convertIndentWorkspace
 } from './commands/cleanWorkspace';
 import { removeEmptyFilesWorkspace } from './commands/cleanEmptyFiles';
 import { removeEmptyFoldersWorkspace } from './commands/cleanEmptyFolders';
@@ -85,6 +87,13 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	);
 
+	const disposableConvertIndent = vscode.commands.registerCommand(
+		'codeCleaner.convertIndent',
+		async () => {
+			await promptScopeAndExecute('Convert Indentation', convertIndentCurrentFile, convertIndentWorkspace);
+		}
+	);
+
 	const disposableRemoveEmptyFiles = vscode.commands.registerCommand(
 		'codeCleaner.removeEmptyFiles',
 		async () => {
@@ -106,6 +115,7 @@ export function activate(context: vscode.ExtensionContext) {
 		disposableRemoveTrailingSpaces,
 		disposableRemoveConsoleLogs,
 		disposableSortImports,
+		disposableConvertIndent,
 		disposableRemoveEmptyFiles,
 		disposableRemoveEmptyFolders
 	);

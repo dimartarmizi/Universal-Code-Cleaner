@@ -14,10 +14,12 @@ export async function applyProcessorToEditor(editor: vscode.TextEditor, processo
 		'EmptyFiles': 'empty files',
 		'EmptyFolders': 'empty folders',
 		'ConsoleLog': 'console logs',
-		'SortImports': 'sorted imports'
+		'SortImports': 'sorted imports',
+		'Indent': 'indentations'
 	};
 	const verbMap: Record<string, string> = {
-		'SortImports': 'sort'
+		'SortImports': 'sort',
+		'Indent': 'convert'
 	};
 	const actionName = nameMap[processor.name] || processor.name.toLowerCase();
 	const actionVerb = verbMap[processor.name] || 'clean';
@@ -76,10 +78,12 @@ export async function applyProcessorToWorkspace(processor: CodeCleanerProcessor,
 		'EmptyFiles': 'empty files',
 		'EmptyFolders': 'empty folders',
 		'ConsoleLog': 'console logs',
-		'SortImports': 'sorted imports'
+		'SortImports': 'sorted imports',
+		'Indent': 'indentations'
 	};
 	const verbMap: Record<string, string> = {
-		'SortImports': 'sort'
+		'SortImports': 'sort',
+		'Indent': 'convert'
 	};
 	const actionName = nameMap[processor.name] || processor.name.toLowerCase();
 	const actionVerb = verbMap[processor.name] || 'clean';
@@ -136,7 +140,7 @@ export async function applyProcessorToWorkspace(processor: CodeCleanerProcessor,
 	let modifiedCount = 0;
 	let removedCount = 0;
 
-	const progressTitle = actionVerb === 'sort' ? 'Sorting' : 'Cleaning';
+	const progressTitle = actionVerb === 'sort' ? 'Sorting' : (actionVerb === 'convert' ? 'Converting' : 'Cleaning');
 	await vscode.window.withProgress({
 		location: vscode.ProgressLocation.Notification,
 		title: `${progressTitle} ${actionName}...`,

@@ -36,6 +36,11 @@ Organizes and sorts your imports alphabetically, removing duplicates and cleanin
 * **Remove Empty Files**: Safely deletes 0-byte or whitespace-only files.
 * **Remove Empty Folders**: Recursively traverses directory structures and removes empty folders from the deepest subdirectory upward, ensuring nested empty structures are fully cleared.
 
+### 8. ⌨️ Convert Indentation
+Converts leading line indentation between tabs and spaces.
+* **Tab-Centered Defaults**: Standardizes tabs as the default target style.
+* **Customizable Sizes**: Allows mapping custom space-equivalent counts when converting to/from tabs.
+
 ---
 
 ## Configuration Settings
@@ -51,6 +56,8 @@ You can customize the extension behavior in your `settings.json`:
 | `codeCleaner.consoleLogs.keepError` | `boolean` | `true` | Preserve `console.error` statements when cleaning console logs. |
 | `codeCleaner.consoleLogs.keepWarn` | `boolean` | `false` | Preserve `console.warn` statements when cleaning console logs. |
 | `codeCleaner.emptyLines.maxConsecutive` | `integer` | `1` | Maximum consecutive empty lines allowed in a document. |
+| `codeCleaner.indent.style` | `string` | `"tab"` | Target indentation style (`"tab"` or `"space"`). |
+| `codeCleaner.indent.size` | `integer` | `4` | Number of spaces equivalent to one tab for conversion. |
 
 ---
 
@@ -58,23 +65,17 @@ You can customize the extension behavior in your `settings.json`:
 
 Open the **Command Palette** (`Ctrl+Shift+P` on Windows/Linux or `Cmd+Shift+P` on macOS) and search for the following commands:
 
-### Active File Commands
-* `Clean Code: Remove Comments from Current File`
-* `Clean Code: Remove Dead Code from Current File`
-* `Clean Code: Remove Empty Lines from Current File`
-* `Clean Code: Remove Trailing Spaces from Current File`
-* `Clean Code: Remove Console Logs from Current File`
-* `Clean Code: Sort Imports in Current File`
+* `Clean Code: Remove Comments` - Cleans single-line and multi-line comments.
+* `Clean Code: Remove Dead Code` - Cleans unused variables, imports, and symbols.
+* `Clean Code: Remove Empty Lines` - Cleans consecutive or invalid empty lines.
+* `Clean Code: Remove Trailing Spaces` - Cleans trailing whitespaces at the end of lines.
+* `Clean Code: Remove Console Logs` - Cleans debug console logs while preserving errors.
+* `Clean Code: Sort Imports` - Alphabetizes and optimizes block imports.
+* `Clean Code: Convert Indentation` - Standardizes line indentations between tabs and spaces.
+* `Clean Code: Remove Empty Files` - Removes 0-byte or empty files from the workspace.
+* `Clean Code: Remove Empty Folders` - Recursively cleans empty directory structures.
 
-### Workspace-Wide Commands
-* `Clean Code: Remove Comments from Workspace`
-* `Clean Code: Remove Dead Code from Workspace`
-* `Clean Code: Remove Empty Lines from Workspace`
-* `Clean Code: Remove Trailing Spaces from Workspace`
-* `Clean Code: Remove Console Logs from Workspace`
-* `Clean Code: Sort Imports in Workspace`
-* `Clean Code: Remove Empty Files from Workspace`
-* `Clean Code: Remove Empty Folders from Workspace`
+*Note: For the content cleaning commands, a selection prompt will ask whether you want to apply the operation to the **Current File** or across the **Workspace**.*
 
 ---
 

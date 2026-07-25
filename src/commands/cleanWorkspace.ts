@@ -8,6 +8,7 @@ import { EmptyLinesProcessor } from '../remover/emptyLinesProcessor';
 import { TrailingSpacesProcessor } from '../remover/trailingSpacesProcessor';
 import { ConsoleLogProcessor } from '../remover/consoleLogProcessor';
 import { SortImportsProcessor } from '../remover/sortImportsProcessor';
+import { IndentProcessor } from '../remover/indentProcessor';
 import { applyProcessorToWorkspace } from '../remover/cleanerEngine';
 
 const commentProcessor = new CommentProcessor();
@@ -16,6 +17,7 @@ const emptyLinesProcessor = new EmptyLinesProcessor();
 const trailingSpacesProcessor = new TrailingSpacesProcessor();
 const consoleLogProcessor = new ConsoleLogProcessor();
 const sortImportsProcessor = new SortImportsProcessor();
+const indentProcessor = new IndentProcessor();
 
 export async function removeCommentsWorkspace() {
 	const settings = getSettings();
@@ -51,6 +53,12 @@ export async function sortImportsWorkspace() {
 	const settings = getSettings();
 	const files = await scanWorkspace(settings.ignore);
 	await applyProcessorToWorkspace(sortImportsProcessor, settings, files, getLanguageByExtension, showPreview, showStatistics);
+}
+
+export async function convertIndentWorkspace() {
+	const settings = getSettings();
+	const files = await scanWorkspace(settings.ignore);
+	await applyProcessorToWorkspace(indentProcessor, settings, files, getLanguageByExtension, showPreview, showStatistics);
 }
 
 

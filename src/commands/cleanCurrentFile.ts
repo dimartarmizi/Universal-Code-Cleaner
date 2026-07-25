@@ -7,6 +7,7 @@ import { EmptyLinesProcessor } from '../remover/emptyLinesProcessor';
 import { TrailingSpacesProcessor } from '../remover/trailingSpacesProcessor';
 import { ConsoleLogProcessor } from '../remover/consoleLogProcessor';
 import { SortImportsProcessor } from '../remover/sortImportsProcessor';
+import { IndentProcessor } from '../remover/indentProcessor';
 import { applyProcessorToEditor } from '../remover/cleanerEngine';
 
 const commentProcessor = new CommentProcessor();
@@ -15,6 +16,7 @@ const emptyLinesProcessor = new EmptyLinesProcessor();
 const trailingSpacesProcessor = new TrailingSpacesProcessor();
 const consoleLogProcessor = new ConsoleLogProcessor();
 const sortImportsProcessor = new SortImportsProcessor();
+const indentProcessor = new IndentProcessor();
 
 export async function removeCommentsCurrentFile() {
 	const editor = vscode.window.activeTextEditor;
@@ -74,6 +76,16 @@ export async function sortImportsCurrentFile() {
 	}
 	const settings = getSettings();
 	await applyProcessorToEditor(editor, sortImportsProcessor, settings, showPreview, showStatistics);
+}
+
+export async function convertIndentCurrentFile() {
+	const editor = vscode.window.activeTextEditor;
+	if (!editor) {
+		vscode.window.showErrorMessage('No active text editor found.');
+		return;
+	}
+	const settings = getSettings();
+	await applyProcessorToEditor(editor, indentProcessor, settings, showPreview, showStatistics);
 }
 
 

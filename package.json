@@ -46,6 +46,10 @@
       {
         "command": "codeCleaner.removeEmptyFolders",
         "title": "Clean Code: Remove Empty Folders"
+      },
+      {
+        "command": "codeCleaner.convertIndent",
+        "title": "Clean Code: Convert Indentation"
       }
     ],
     "configuration": {
@@ -103,6 +107,18 @@
           "default": 1,
           "minimum": 0,
           "description": "Maximum consecutive empty lines allowed in document."
+        },
+        "codeCleaner.indent.style": {
+          "default": "tab",
+          "description": "Target indentation style (tab or space).",
+          "enum": ["tab", "space"],
+          "type": "string"
+        },
+        "codeCleaner.indent.size": {
+          "default": 4,
+          "description": "Number of spaces equivalent to one tab for conversion.",
+          "minimum": 1,
+          "type": "integer"
         }
       }
     }

@@ -8,7 +8,7 @@ export interface ScanResult {
 }
 
 export function showStatistics(modifiedFiles: number, totalItemsRemoved: number, durationSeconds: number, actionName: string = 'Items', actionVerb: string = 'clean'): void {
-	const pastTense = actionVerb === 'sort' ? 'sorted' : 'cleaned';
+	const pastTense = actionVerb === 'sort' ? 'sorted' : (actionVerb === 'convert' ? 'converted' : 'cleaned');
 	vscode.window.showInformationMessage(
 		`Finished!\nFiles modified: ${modifiedFiles}\n${actionName} ${pastTense}: ${totalItemsRemoved}\nElapsed: ${durationSeconds.toFixed(1)} seconds`
 	);
@@ -43,7 +43,7 @@ export async function showPreview(scanResults: ScanResult[], actionName: string 
 
 	message += `\nTotal: ${totalItems} ${actionName} across ${totalFiles} files.\n\nDo you want to ${actionVerb} ${actionName}?`;
 
-	const buttonLabel = actionVerb === 'sort' ? 'Sort' : 'Clean';
+	const buttonLabel = actionVerb === 'sort' ? 'Sort' : (actionVerb === 'convert' ? 'Convert' : 'Clean');
 
 	const option = await vscode.window.showWarningMessage(
 		message,

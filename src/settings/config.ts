@@ -12,6 +12,10 @@ export interface CommentRemoverSettings {
 	emptyLines: {
 		maxConsecutive: number;
 	};
+	indent?: {
+		style: 'tab' | 'space';
+		size: number;
+	};
 }
 
 export function getSettings(): CommentRemoverSettings {
@@ -27,6 +31,10 @@ export function getSettings(): CommentRemoverSettings {
 		},
 		emptyLines: {
 			maxConsecutive: config.get<number>('emptyLines.maxConsecutive') ?? 1
+		},
+		indent: {
+			style: config.get<'tab' | 'space'>('indent.style') || 'tab',
+			size: config.get<number>('indent.size') ?? 4
 		}
 	};
 }
