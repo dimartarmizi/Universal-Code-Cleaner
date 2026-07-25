@@ -12,12 +12,29 @@ export class EmptyLinesProcessor implements CodeCleanerProcessor {
 		const maxAllowed = settings.emptyLines.maxConsecutive;
 		let consecutiveEmptyCount = 0;
 
+		let lastNonEmptyLine = -1;
+		for (let i = lineCount - 1; i >= 0; i--) {
+			if (document.lineAt(i).text.trim() !== '') {
+				lastNonEmptyLine = i;
+				break;
+			}
+		}
+
 		for (let i = 0; i < lineCount; i++) {
 			const lineText = document.lineAt(i).text;
 			const isLineEmpty = lineText.trim() === '';
 
 			if (isLineEmpty) {
 				consecutiveEmptyCount++;
+
+				if (lastNonEmptyLine !== -1 && i > lastNonEmptyLine) {
+					const startPos = new vscode.Position(i, 0);
+					const endPos = i < lineCount - 1
+						? new vscode.Position(i + 1, 0)
+						: new vscode.Position(i, lineText.length);
+					ranges.push(new vscode.Range(startPos, endPos));
+					continue;
+				}
 
 				let isAfterBlockOpen = false;
 				if (i > 0) {
@@ -34,7 +51,7 @@ export class EmptyLinesProcessor implements CodeCleanerProcessor {
 						nextLineIdx++;
 					}
 					const nextLineText = document.lineAt(nextLineIdx).text.trim();
-					if (/^[}\])\:]/.test(nextLineText)) {
+					if (/^[}\])]/.test(nextLineText)) {
 						isBeforeBlockClose = true;
 					}
 				}
