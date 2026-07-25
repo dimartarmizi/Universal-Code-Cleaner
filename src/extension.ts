@@ -18,120 +18,96 @@ import {
 import { removeEmptyFilesWorkspace } from './commands/cleanEmptyFiles';
 import { removeEmptyFoldersWorkspace } from './commands/cleanEmptyFolders';
 
+async function promptScopeAndExecute(
+	actionName: string,
+	currentFileAction: () => Promise<void>,
+	workspaceAction: () => Promise<void>
+) {
+	const choice = await vscode.window.showQuickPick(
+		[
+			{ label: '$(file) Current File', description: `Apply to active document only` },
+			{ label: '$(files) Workspace', description: `Apply to all supported files in workspace` }
+		],
+		{
+			placeHolder: `Choose scope for: ${actionName}`
+		}
+	);
+
+	if (choice) {
+		if (choice.label.includes('Current File')) {
+			await currentFileAction();
+		} else if (choice.label.includes('Workspace')) {
+			await workspaceAction();
+		}
+	}
+}
+
 export function activate(context: vscode.ExtensionContext) {
-	const disposableRemoveCommentsCurrent = vscode.commands.registerCommand(
-		'codeCleaner.removeCommentsCurrentFile',
+	const disposableRemoveComments = vscode.commands.registerCommand(
+		'codeCleaner.removeComments',
 		async () => {
-			await removeCommentsCurrentFile();
+			await promptScopeAndExecute('Remove Comments', removeCommentsCurrentFile, removeCommentsWorkspace);
 		}
 	);
 
-	const disposableRemoveCommentsWorkspace = vscode.commands.registerCommand(
-		'codeCleaner.removeCommentsWorkspace',
+	const disposableRemoveDeadCode = vscode.commands.registerCommand(
+		'codeCleaner.removeDeadCode',
 		async () => {
-			await removeCommentsWorkspace();
+			await promptScopeAndExecute('Remove Dead Code', removeDeadCodeCurrentFile, removeDeadCodeWorkspace);
 		}
 	);
 
-	const disposableRemoveDeadCodeCurrent = vscode.commands.registerCommand(
-		'codeCleaner.removeDeadCodeCurrentFile',
+	const disposableRemoveEmptyLines = vscode.commands.registerCommand(
+		'codeCleaner.removeEmptyLines',
 		async () => {
-			await removeDeadCodeCurrentFile();
+			await promptScopeAndExecute('Remove Empty Lines', removeEmptyLinesCurrentFile, removeEmptyLinesWorkspace);
 		}
 	);
 
-	const disposableRemoveDeadCodeWorkspace = vscode.commands.registerCommand(
-		'codeCleaner.removeDeadCodeWorkspace',
+	const disposableRemoveTrailingSpaces = vscode.commands.registerCommand(
+		'codeCleaner.removeTrailingSpaces',
 		async () => {
-			await removeDeadCodeWorkspace();
+			await promptScopeAndExecute('Remove Trailing Spaces', removeTrailingSpacesCurrentFile, removeTrailingSpacesWorkspace);
 		}
 	);
 
-	const disposableRemoveEmptyLinesCurrent = vscode.commands.registerCommand(
-		'codeCleaner.removeEmptyLinesCurrentFile',
+	const disposableRemoveConsoleLogs = vscode.commands.registerCommand(
+		'codeCleaner.removeConsoleLogs',
 		async () => {
-			await removeEmptyLinesCurrentFile();
+			await promptScopeAndExecute('Remove Console Logs', removeConsoleLogsCurrentFile, removeConsoleLogsWorkspace);
 		}
 	);
 
-	const disposableRemoveEmptyLinesWorkspace = vscode.commands.registerCommand(
-		'codeCleaner.removeEmptyLinesWorkspace',
+	const disposableSortImports = vscode.commands.registerCommand(
+		'codeCleaner.sortImports',
 		async () => {
-			await removeEmptyLinesWorkspace();
+			await promptScopeAndExecute('Sort Imports', sortImportsCurrentFile, sortImportsWorkspace);
 		}
 	);
 
-	const disposableRemoveTrailingSpacesCurrent = vscode.commands.registerCommand(
-		'codeCleaner.removeTrailingSpacesCurrentFile',
-		async () => {
-			await removeTrailingSpacesCurrentFile();
-		}
-	);
-
-	const disposableRemoveTrailingSpacesWorkspace = vscode.commands.registerCommand(
-		'codeCleaner.removeTrailingSpacesWorkspace',
-		async () => {
-			await removeTrailingSpacesWorkspace();
-		}
-	);
-
-	const disposableRemoveConsoleLogsCurrent = vscode.commands.registerCommand(
-		'codeCleaner.removeConsoleLogsCurrentFile',
-		async () => {
-			await removeConsoleLogsCurrentFile();
-		}
-	);
-
-	const disposableRemoveConsoleLogsWorkspace = vscode.commands.registerCommand(
-		'codeCleaner.removeConsoleLogsWorkspace',
-		async () => {
-			await removeConsoleLogsWorkspace();
-		}
-	);
-
-	const disposableSortImportsCurrent = vscode.commands.registerCommand(
-		'codeCleaner.sortImportsCurrentFile',
-		async () => {
-			await sortImportsCurrentFile();
-		}
-	);
-
-	const disposableSortImportsWorkspace = vscode.commands.registerCommand(
-		'codeCleaner.sortImportsWorkspace',
-		async () => {
-			await sortImportsWorkspace();
-		}
-	);
-
-	const disposableRemoveEmptyFilesWorkspace = vscode.commands.registerCommand(
-		'codeCleaner.removeEmptyFilesWorkspace',
+	const disposableRemoveEmptyFiles = vscode.commands.registerCommand(
+		'codeCleaner.removeEmptyFiles',
 		async () => {
 			await removeEmptyFilesWorkspace();
 		}
 	);
 
-	const disposableRemoveEmptyFoldersWorkspace = vscode.commands.registerCommand(
-		'codeCleaner.removeEmptyFoldersWorkspace',
+	const disposableRemoveEmptyFolders = vscode.commands.registerCommand(
+		'codeCleaner.removeEmptyFolders',
 		async () => {
 			await removeEmptyFoldersWorkspace();
 		}
 	);
 
 	context.subscriptions.push(
-		disposableRemoveCommentsCurrent,
-		disposableRemoveCommentsWorkspace,
-		disposableRemoveDeadCodeCurrent,
-		disposableRemoveDeadCodeWorkspace,
-		disposableRemoveEmptyLinesCurrent,
-		disposableRemoveEmptyLinesWorkspace,
-		disposableRemoveTrailingSpacesCurrent,
-		disposableRemoveTrailingSpacesWorkspace,
-		disposableRemoveConsoleLogsCurrent,
-		disposableRemoveConsoleLogsWorkspace,
-		disposableSortImportsCurrent,
-		disposableSortImportsWorkspace,
-		disposableRemoveEmptyFilesWorkspace,
-		disposableRemoveEmptyFoldersWorkspace
+		disposableRemoveComments,
+		disposableRemoveDeadCode,
+		disposableRemoveEmptyLines,
+		disposableRemoveTrailingSpaces,
+		disposableRemoveConsoleLogs,
+		disposableSortImports,
+		disposableRemoveEmptyFiles,
+		disposableRemoveEmptyFolders
 	);
 }
 

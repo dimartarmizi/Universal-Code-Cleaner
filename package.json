@@ -16,60 +16,36 @@
   "contributes": {
     "commands": [
       {
-        "command": "codeCleaner.removeCommentsCurrentFile",
-        "title": "Clean Code: Remove Comments from Current File"
+        "command": "codeCleaner.removeComments",
+        "title": "Clean Code: Remove Comments"
       },
       {
-        "command": "codeCleaner.removeCommentsWorkspace",
-        "title": "Clean Code: Remove Comments from Workspace"
+        "command": "codeCleaner.removeDeadCode",
+        "title": "Clean Code: Remove Dead Code"
       },
       {
-        "command": "codeCleaner.removeDeadCodeCurrentFile",
-        "title": "Clean Code: Remove Dead Code from Current File"
+        "command": "codeCleaner.removeEmptyLines",
+        "title": "Clean Code: Remove Empty Lines"
       },
       {
-        "command": "codeCleaner.removeDeadCodeWorkspace",
-        "title": "Clean Code: Remove Dead Code from Workspace"
+        "command": "codeCleaner.removeTrailingSpaces",
+        "title": "Clean Code: Remove Trailing Spaces"
       },
       {
-        "command": "codeCleaner.removeEmptyLinesCurrentFile",
-        "title": "Clean Code: Remove Empty Lines from Current File"
+        "command": "codeCleaner.removeConsoleLogs",
+        "title": "Clean Code: Remove Console Logs"
       },
       {
-        "command": "codeCleaner.removeEmptyLinesWorkspace",
-        "title": "Clean Code: Remove Empty Lines from Workspace"
+        "command": "codeCleaner.sortImports",
+        "title": "Clean Code: Sort Imports"
       },
       {
-        "command": "codeCleaner.removeTrailingSpacesCurrentFile",
-        "title": "Clean Code: Remove Trailing Spaces from Current File"
+        "command": "codeCleaner.removeEmptyFiles",
+        "title": "Clean Code: Remove Empty Files"
       },
       {
-        "command": "codeCleaner.removeTrailingSpacesWorkspace",
-        "title": "Clean Code: Remove Trailing Spaces from Workspace"
-      },
-      {
-        "command": "codeCleaner.removeConsoleLogsCurrentFile",
-        "title": "Clean Code: Remove Console Logs from Current File"
-      },
-      {
-        "command": "codeCleaner.removeConsoleLogsWorkspace",
-        "title": "Clean Code: Remove Console Logs from Workspace"
-      },
-      {
-        "command": "codeCleaner.sortImportsCurrentFile",
-        "title": "Clean Code: Sort Imports in Current File"
-      },
-      {
-        "command": "codeCleaner.sortImportsWorkspace",
-        "title": "Clean Code: Sort Imports in Workspace"
-      },
-      {
-        "command": "codeCleaner.removeEmptyFilesWorkspace",
-        "title": "Clean Code: Remove Empty Files from Workspace"
-      },
-      {
-        "command": "codeCleaner.removeEmptyFoldersWorkspace",
-        "title": "Clean Code: Remove Empty Folders from Workspace"
+        "command": "codeCleaner.removeEmptyFolders",
+        "title": "Clean Code: Remove Empty Folders"
       }
     ],
     "configuration": {
