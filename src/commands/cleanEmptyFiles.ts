@@ -1,9 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import * as path from 'path';
 import { getSettings } from '../settings/config';
 import { scanWorkspace } from '../scanner/workspaceScanner';
-import { showPreview, showStatistics } from '../preview/diffPreview';
 
 export async function removeEmptyFilesWorkspace() {
 	const settings = getSettings();
@@ -31,15 +29,12 @@ export async function removeEmptyFilesWorkspace() {
 		return;
 	}
 
-	const scanResults = emptyFiles.map(file => ({
-		filePath: file,
-		languageId: path.extname(file).substring(1) || 'file',
-		commentCount: 1,
-		commentsSize: 0
-	}));
-
-	const proceed = await showPreview(scanResults, 'empty files', 'delete');
-	if (!proceed) {
+	const proceed = await vscode.window.showWarningMessage(
+		`Found ${emptyFiles.length} empty files. Do you want to delete them?`,
+		{ modal: true },
+		'Delete'
+	);
+	if (proceed !== 'Delete') {
 		return;
 	}
 
@@ -56,5 +51,7 @@ export async function removeEmptyFilesWorkspace() {
 	}
 
 	const duration = (Date.now() - startTime) / 1000;
-	showStatistics(deletedCount, deletedCount, duration, 'empty files');
+	vscode.window.showInformationMessage(
+		`Finished!\nFiles deleted: ${deletedCount}\nElapsed: ${duration.toFixed(1)} seconds`
+	);
 }

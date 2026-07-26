@@ -9,7 +9,6 @@ export class IndentProcessor implements CodeCleanerProcessor {
 		const ranges: vscode.Range[] = [];
 		const settings = getSettings();
 		const targetIndent = settings.indent?.style || 'tab';
-		const size = settings.indent?.size || 4;
 
 		const lineCount = document.lineCount;
 		for (let i = 0; i < lineCount; i++) {

@@ -28,6 +28,9 @@ export class EmptyLinesProcessor implements CodeCleanerProcessor {
 				consecutiveEmptyCount++;
 
 				if (lastNonEmptyLine !== -1 && i > lastNonEmptyLine) {
+					if (i === lineCount - 1) {
+						continue;
+					}
 					const startPos = new vscode.Position(i, 0);
 					const endPos = i < lineCount - 1
 						? new vscode.Position(i + 1, 0)

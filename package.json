@@ -50,8 +50,185 @@
       {
         "command": "codeCleaner.convertIndent",
         "title": "Clean Code: Convert Indentation"
+      },
+      {
+        "command": "codeCleaner.toggleFileItem",
+        "icon": "$(check)",
+        "title": "Toggle Selection"
+      },
+      {
+        "command": "codeCleaner.applySelectedClean",
+        "icon": "$(check-all)",
+        "enablement": "codeCleaner.hasResults",
+        "title": "Apply Selected Changes"
+      },
+      {
+        "command": "codeCleaner.clearResults",
+        "icon": "$(clear-all)",
+        "enablement": "codeCleaner.hasResults",
+        "title": "Clear Results"
+      },
+      {
+        "command": "codeCleaner.refreshResults",
+        "icon": "$(refresh)",
+        "enablement": "codeCleaner.hasResults",
+        "title": "Refresh Scan"
+      },
+      {
+        "command": "codeCleaner.collapseAllResults",
+        "icon": "$(collapse-all)",
+        "enablement": "codeCleaner.hasResults",
+        "title": "Collapse All"
+      },
+      {
+        "command": "codeCleaner.expandAllResults",
+        "icon": "$(expand-all)",
+        "enablement": "codeCleaner.hasResults",
+        "title": "Expand All"
+      },
+      {
+        "command": "codeCleaner.runActionFromSidebar",
+        "icon": "$(play-circle)",
+        "title": "Run Clean Code Action"
+      },
+      {
+        "command": "codeCleaner.toggleViewMode",
+        "icon": "$(list-tree)",
+        "enablement": "codeCleaner.hasResults",
+        "title": "Show as List"
+      },
+      {
+        "command": "codeCleaner.toggleViewModeTree",
+        "icon": "$(list-flat)",
+        "enablement": "codeCleaner.hasResults",
+        "title": "Show as Tree"
+      },
+      {
+        "command": "codeCleaner.applySingleLineItem",
+        "icon": "$(check)",
+        "title": "Apply Line Change"
+      },
+      {
+        "command": "codeCleaner.applySingleFileItem",
+        "icon": "$(check-all)",
+        "title": "Apply File Changes"
+      },
+      {
+        "command": "codeCleaner.dismissLineItem",
+        "icon": "$(x)",
+        "title": "Dismiss Line Change"
+      },
+      {
+        "command": "codeCleaner.dismissFileItem",
+        "icon": "$(x)",
+        "title": "Dismiss File Changes"
+      },
+      {
+        "command": "codeCleaner.dismissFolderItem",
+        "icon": "$(x)",
+        "title": "Dismiss Folder"
+      },
+      {
+        "command": "codeCleaner.applySingleFolderItem",
+        "icon": "$(check-all)",
+        "title": "Apply Folder Changes"
       }
     ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "code-cleaner-view-container",
+          "title": "Code Cleaner",
+          "icon": "$(rocket)"
+        }
+      ]
+    },
+    "views": {
+      "code-cleaner-view-container": [
+        {
+          "id": "codeCleanerSidebar",
+          "name": "Code Cleaner",
+          "type": "tree",
+          "icon": "$(rocket)"
+        }
+      ]
+    },
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "codeCleaner.applySingleFolderItem",
+          "when": "view == codeCleanerSidebar && viewItem == cleanerFolderItem",
+          "group": "inline"
+        },
+        {
+          "command": "codeCleaner.dismissFolderItem",
+          "when": "view == codeCleanerSidebar && viewItem == cleanerFolderItem",
+          "group": "inline"
+        },
+        {
+          "command": "codeCleaner.applySingleFileItem",
+          "when": "view == codeCleanerSidebar && viewItem == cleanerFileItem",
+          "group": "inline"
+        },
+        {
+          "command": "codeCleaner.dismissFileItem",
+          "when": "view == codeCleanerSidebar && viewItem == cleanerFileItem",
+          "group": "inline"
+        },
+        {
+          "command": "codeCleaner.applySingleLineItem",
+          "when": "view == codeCleanerSidebar && viewItem == cleanerLineItem",
+          "group": "inline"
+        },
+        {
+          "command": "codeCleaner.dismissLineItem",
+          "when": "view == codeCleanerSidebar && viewItem == cleanerLineItem",
+          "group": "inline"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "codeCleaner.runActionFromSidebar",
+          "when": "view == codeCleanerSidebar",
+          "group": "navigation@1"
+        },
+        {
+          "command": "codeCleaner.applySelectedClean",
+          "when": "view == codeCleanerSidebar",
+          "group": "navigation@2"
+        },
+        {
+          "command": "codeCleaner.refreshResults",
+          "when": "view == codeCleanerSidebar",
+          "group": "navigation@3"
+        },
+        {
+          "command": "codeCleaner.toggleViewMode",
+          "when": "view == codeCleanerSidebar && !codeCleaner.isListView",
+          "group": "navigation@4"
+        },
+        {
+          "command": "codeCleaner.toggleViewModeTree",
+          "when": "view == codeCleanerSidebar && codeCleaner.isListView",
+          "group": "navigation@4"
+        },
+        {
+          "command": "codeCleaner.collapseAllResults",
+          "when": "view == codeCleanerSidebar && !codeCleaner.isCollapsed",
+          "group": "navigation@5"
+        },
+        {
+          "command": "codeCleaner.expandAllResults",
+          "when": "view == codeCleanerSidebar && codeCleaner.isCollapsed",
+          "group": "navigation@5"
+        },
+        {
+          "command": "codeCleaner.clearResults",
+          "when": "view == codeCleanerSidebar",
+          "group": "navigation@6"
+        }
+      ]
+    },
     "configuration": {
       "title": "Universal Code Cleaner",
       "properties": {

@@ -1,6 +1,4 @@
 import * as vscode from 'vscode';
-import { getSettings } from '../settings/config';
-import { showPreview, showStatistics } from '../preview/diffPreview';
 import { CommentProcessor } from '../remover/commentProcessor';
 import { DeadCodeProcessor } from '../remover/deadCodeProcessor';
 import { EmptyLinesProcessor } from '../remover/emptyLinesProcessor';
@@ -24,8 +22,7 @@ export async function removeCommentsCurrentFile() {
 		vscode.window.showErrorMessage('No active text editor found.');
 		return;
 	}
-	const settings = getSettings();
-	await applyProcessorToEditor(editor, commentProcessor, settings, showPreview, showStatistics);
+	await applyProcessorToEditor(editor, commentProcessor);
 }
 
 export async function removeDeadCodeCurrentFile() {
@@ -34,8 +31,7 @@ export async function removeDeadCodeCurrentFile() {
 		vscode.window.showErrorMessage('No active text editor found.');
 		return;
 	}
-	const settings = getSettings();
-	await applyProcessorToEditor(editor, deadCodeProcessor, settings, showPreview, showStatistics);
+	await applyProcessorToEditor(editor, deadCodeProcessor);
 }
 
 export async function removeEmptyLinesCurrentFile() {
@@ -44,8 +40,7 @@ export async function removeEmptyLinesCurrentFile() {
 		vscode.window.showErrorMessage('No active text editor found.');
 		return;
 	}
-	const settings = getSettings();
-	await applyProcessorToEditor(editor, emptyLinesProcessor, settings, showPreview, showStatistics);
+	await applyProcessorToEditor(editor, emptyLinesProcessor);
 }
 
 export async function removeTrailingSpacesCurrentFile() {
@@ -54,8 +49,7 @@ export async function removeTrailingSpacesCurrentFile() {
 		vscode.window.showErrorMessage('No active text editor found.');
 		return;
 	}
-	const settings = getSettings();
-	await applyProcessorToEditor(editor, trailingSpacesProcessor, settings, showPreview, showStatistics);
+	await applyProcessorToEditor(editor, trailingSpacesProcessor);
 }
 
 export async function removeConsoleLogsCurrentFile() {
@@ -64,8 +58,7 @@ export async function removeConsoleLogsCurrentFile() {
 		vscode.window.showErrorMessage('No active text editor found.');
 		return;
 	}
-	const settings = getSettings();
-	await applyProcessorToEditor(editor, consoleLogProcessor, settings, showPreview, showStatistics);
+	await applyProcessorToEditor(editor, consoleLogProcessor);
 }
 
 export async function sortImportsCurrentFile() {
@@ -74,8 +67,7 @@ export async function sortImportsCurrentFile() {
 		vscode.window.showErrorMessage('No active text editor found.');
 		return;
 	}
-	const settings = getSettings();
-	await applyProcessorToEditor(editor, sortImportsProcessor, settings, showPreview, showStatistics);
+	await applyProcessorToEditor(editor, sortImportsProcessor);
 }
 
 export async function convertIndentCurrentFile() {
@@ -84,8 +76,7 @@ export async function convertIndentCurrentFile() {
 		vscode.window.showErrorMessage('No active text editor found.');
 		return;
 	}
-	const settings = getSettings();
-	await applyProcessorToEditor(editor, indentProcessor, settings, showPreview, showStatistics);
+	await applyProcessorToEditor(editor, indentProcessor);
 }
 
 

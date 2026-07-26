@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
-import * as fs from 'fs';
 import { CodeCleanerProcessor } from './IProcessor';
 
-export async function applyProcessorToEditor(editor: vscode.TextEditor, processor: CodeCleanerProcessor, settings: any, showPreview: any, showStatistics: any) {
+export async function applyProcessorToEditor(editor: vscode.TextEditor, processor: CodeCleanerProcessor) {
 	const document = editor.document;
 	const ranges = await processor.scan(document);
 
@@ -17,58 +16,36 @@ export async function applyProcessorToEditor(editor: vscode.TextEditor, processo
 		'SortImports': 'sorted imports',
 		'Indent': 'indentations'
 	};
-	const verbMap: Record<string, string> = {
-		'SortImports': 'sort',
-		'Indent': 'convert'
-	};
 	const actionName = nameMap[processor.name] || processor.name.toLowerCase();
-	const actionVerb = verbMap[processor.name] || 'clean';
 
 	if (ranges.length === 0) {
-		vscode.window.showInformationMessage(`No ${actionName} found to ${actionVerb} in this file.`);
+		vscode.window.showInformationMessage(`No ${actionName} found to process in this file.`);
 		return;
 	}
 
-	if (settings.preview) {
-		const confirm = await showPreview([{
+	const { treeProvider, previewContentProvider, computeCleanedContent } = require('../preview/previewManager');
+	if (treeProvider && previewContentProvider) {
+		const fileItem: import('../preview/view').FileItem = {
 			filePath: document.fileName,
-			languageId: document.languageId,
-			commentCount: ranges.length,
-			commentsSize: 0
-		}], actionName, actionVerb);
-		if (!confirm) {
-			return;
-		}
+			relativePath: vscode.workspace.asRelativePath(document.fileName),
+			actionName: actionName,
+			ranges: ranges,
+			processorName: processor.name,
+			checked: true
+		};
+		treeProvider.clearCollapseStates();
+		treeProvider.updateItems([fileItem]);
+		const cleaned = computeCleanedContent(document, processor, ranges);
+		const previewUri = vscode.Uri.parse(`code-cleaner-preview:${document.fileName}`);
+		previewContentProvider.updatePreview(previewUri, cleaned);
+		vscode.window.showInformationMessage(`Found ${ranges.length} ${actionName} in this file. Please check the Code Cleaner sidebar panel to review and apply changes.`);
+		return;
 	}
-
-	const startTime = Date.now();
-	await editor.edit(editBuilder => {
-		if (processor.applyCustomEdit) {
-			processor.applyCustomEdit(editBuilder, document);
-		} else {
-			const sorted = [...ranges].sort((a, b) => {
-				const aStart = document.offsetAt(a.start);
-				const bStart = document.offsetAt(b.start);
-				return bStart - aStart;
-			});
-
-			for (const range of sorted) {
-				editBuilder.delete(range);
-			}
-		}
-	});
-
-	if (settings.autoSave) {
-		await document.save();
-	}
-
-	const duration = (Date.now() - startTime) / 1000;
-	showStatistics(1, ranges.length, duration, actionName, actionVerb);
 }
 
-export async function applyProcessorToWorkspace(processor: CodeCleanerProcessor, settings: any, files: string[], getLanguageByExtension: any, showPreview: any, showStatistics: any) {
-	const scanResults: any[] = [];
+export async function applyProcessorToWorkspace(processor: CodeCleanerProcessor, files: string[], getLanguageByExtension: any) {
 	const fileContentsMap = new Map<string, { ranges: vscode.Range[] }>();
+	const fileItems: import('../preview/view').FileItem[] = [];
 
 	const nameMap: Record<string, string> = {
 		'Comments': 'comments',
@@ -81,12 +58,7 @@ export async function applyProcessorToWorkspace(processor: CodeCleanerProcessor,
 		'SortImports': 'sorted imports',
 		'Indent': 'indentations'
 	};
-	const verbMap: Record<string, string> = {
-		'SortImports': 'sort',
-		'Indent': 'convert'
-	};
 	const actionName = nameMap[processor.name] || processor.name.toLowerCase();
-	const actionVerb = verbMap[processor.name] || 'clean';
 
 	await vscode.window.withProgress({
 		location: vscode.ProgressLocation.Notification,
@@ -111,13 +83,16 @@ export async function applyProcessorToWorkspace(processor: CodeCleanerProcessor,
 
 				const ranges = await processor.scan(doc);
 				if (ranges.length > 0) {
-					scanResults.push({
-						filePath: file,
-						languageId: langConfig.id,
-						commentCount: ranges.length,
-						commentsSize: 0
-					});
 					fileContentsMap.set(file, { ranges });
+
+					fileItems.push({
+						filePath: file,
+						relativePath: vscode.workspace.asRelativePath(file),
+						actionName: actionName,
+						ranges: ranges,
+						processorName: processor.name,
+						checked: true
+					});
 				}
 			} catch (err) {
 			}
@@ -126,81 +101,28 @@ export async function applyProcessorToWorkspace(processor: CodeCleanerProcessor,
 		}
 	});
 
-	if (scanResults.length === 0) {
-		vscode.window.showInformationMessage(`No ${actionName} found to ${actionVerb} in the workspace.`);
+	if (fileItems.length === 0) {
+		vscode.window.showInformationMessage(`No ${actionName} found in the workspace.`);
 		return;
 	}
 
-	const proceed = await showPreview(scanResults, actionName, actionVerb);
-	if (!proceed) {
-		return;
-	}
-
-	const startTime = Date.now();
-	let modifiedCount = 0;
-	let removedCount = 0;
-
-	const progressTitle = actionVerb === 'sort' ? 'Sorting' : (actionVerb === 'convert' ? 'Converting' : 'Cleaning');
-	await vscode.window.withProgress({
-		location: vscode.ProgressLocation.Notification,
-		title: `${progressTitle} ${actionName}...`,
-		cancellable: false
-	}, async (progress) => {
-		let index = 0;
-		for (const [file, info] of fileContentsMap.entries()) {
+	const { treeProvider, previewContentProvider, computeCleanedContent } = require('../preview/previewManager');
+	if (treeProvider && previewContentProvider) {
+		treeProvider.clearCollapseStates();
+		treeProvider.updateItems(fileItems);
+		for (const item of fileItems) {
 			try {
-				let doc = vscode.workspace.textDocuments.find(d => d.fileName === file);
+				let doc = vscode.workspace.textDocuments.find(d => d.fileName === item.filePath);
 				if (!doc) {
-					doc = await vscode.workspace.openTextDocument(file);
+					doc = await vscode.workspace.openTextDocument(item.filePath);
 				}
-
-				const edit = new vscode.WorkspaceEdit();
-				if (processor.applyCustomWorkspaceEdit) {
-					processor.applyCustomWorkspaceEdit(edit, doc);
-				} else {
-					const sorted = [...info.ranges].sort((a, b) => {
-						const aStart = doc!.offsetAt(a.start);
-						const bStart = doc!.offsetAt(b.start);
-						return bStart - aStart;
-					});
-
-					for (const range of sorted) {
-						edit.delete(doc.uri, range);
-					}
-				}
-
-				await vscode.workspace.applyEdit(edit);
-				if (settings.autoSave) {
-					await doc.save();
-				}
-				modifiedCount++;
-				removedCount += info.ranges.length;
-			} catch (err) {
-				try {
-					let content = fs.readFileSync(file, 'utf8');
-					let doc = await vscode.workspace.openTextDocument(file);
-					const sorted = [...info.ranges].sort((a, b) => {
-						const aStart = doc.offsetAt(a.start);
-						const bStart = doc.offsetAt(b.end);
-						return bStart - aStart;
-					});
-					for (const range of sorted) {
-						const startOffset = doc.offsetAt(range.start);
-						const endOffset = doc.offsetAt(range.end);
-						content = content.substring(0, startOffset) + content.substring(endOffset);
-					}
-					fs.writeFileSync(file, content, 'utf8');
-					modifiedCount++;
-					removedCount += info.ranges.length;
-				} catch (fsErr) {
-					vscode.window.showErrorMessage(`Failed to ${actionVerb} file: ${file}`);
-				}
+				const cleaned = computeCleanedContent(doc, processor, item.ranges);
+				const previewUri = vscode.Uri.parse(`code-cleaner-preview:${item.filePath}`);
+				previewContentProvider.updatePreview(previewUri, cleaned);
+			} catch (e) {
 			}
-			index++;
-			progress.report({ increment: (1 / fileContentsMap.size) * 100, message: `${index}/${fileContentsMap.size} files` });
 		}
-	});
-
-	const duration = (Date.now() - startTime) / 1000;
-	showStatistics(modifiedCount, scanResults.length, duration, actionName, actionVerb);
+		vscode.window.showInformationMessage(`Found ${fileItems.length} files with ${actionName}. Please check the Code Cleaner sidebar panel to review and apply changes.`);
+		return;
+	}
 }

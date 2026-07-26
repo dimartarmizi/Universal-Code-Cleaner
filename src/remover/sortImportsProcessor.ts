@@ -130,10 +130,8 @@ export class SortImportsProcessor implements CodeCleanerProcessor {
 		return cleaned.toLowerCase();
 	}
 
-	async scan(document: vscode.TextDocument): Promise<vscode.Range[]> {
+	private scanSync(document: vscode.TextDocument): ImportBlock[] {
 		const docUri = document.uri.toString();
-		this.cachedBlocks.delete(docUri);
-
 		const text = document.getText();
 		const lines = text.split(/\r?\n/);
 		const blocks: ImportBlock[] = [];
@@ -199,22 +197,24 @@ export class SortImportsProcessor implements CodeCleanerProcessor {
 			flushBlock();
 		}
 
-		if (blocks.length > 0) {
-			this.cachedBlocks.set(docUri, blocks);
-			return blocks.map(b => new vscode.Range(
-				new vscode.Position(b.startLine, 0),
-				new vscode.Position(b.endLine, lines[b.endLine].length)
-			));
-		}
+		this.cachedBlocks.set(docUri, blocks);
+		return blocks;
+	}
 
-		return [];
+	async scan(document: vscode.TextDocument): Promise<vscode.Range[]> {
+		const blocks = this.scanSync(document);
+		const lines = document.getText().split(/\r?\n/);
+		return blocks.map(b => new vscode.Range(
+			new vscode.Position(b.startLine, 0),
+			new vscode.Position(b.endLine, lines[b.endLine].length)
+		));
 	}
 
 	applyCustomEdit(editBuilder: vscode.TextEditorEdit, document: vscode.TextDocument): void {
 		const docUri = document.uri.toString();
-		const blocks = this.cachedBlocks.get(docUri);
+		let blocks = this.cachedBlocks.get(docUri);
 		if (!blocks) {
-			return;
+			blocks = this.scanSync(document);
 		}
 
 		for (const block of blocks) {
@@ -228,9 +228,9 @@ export class SortImportsProcessor implements CodeCleanerProcessor {
 
 	applyCustomWorkspaceEdit(edit: vscode.WorkspaceEdit, document: vscode.TextDocument): void {
 		const docUri = document.uri.toString();
-		const blocks = this.cachedBlocks.get(docUri);
+		let blocks = this.cachedBlocks.get(docUri);
 		if (!blocks) {
-			return;
+			blocks = this.scanSync(document);
 		}
 
 		for (const block of blocks) {

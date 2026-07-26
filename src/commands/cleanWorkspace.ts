@@ -1,6 +1,5 @@
 import { getLanguageByExtension } from '../language/languageRegistry';
 import { getSettings } from '../settings/config';
-import { showPreview, showStatistics } from '../preview/diffPreview';
 import { scanWorkspace } from '../scanner/workspaceScanner';
 import { CommentProcessor } from '../remover/commentProcessor';
 import { DeadCodeProcessor } from '../remover/deadCodeProcessor';
@@ -20,45 +19,38 @@ const sortImportsProcessor = new SortImportsProcessor();
 const indentProcessor = new IndentProcessor();
 
 export async function removeCommentsWorkspace() {
-	const settings = getSettings();
-	const files = await scanWorkspace(settings.ignore);
-	await applyProcessorToWorkspace(commentProcessor, settings, files, getLanguageByExtension, showPreview, showStatistics);
+	const files = await scanWorkspace(getSettings().ignore);
+	await applyProcessorToWorkspace(commentProcessor, files, getLanguageByExtension);
 }
 
 export async function removeDeadCodeWorkspace() {
-	const settings = getSettings();
-	const files = await scanWorkspace(settings.ignore);
-	await applyProcessorToWorkspace(deadCodeProcessor, settings, files, getLanguageByExtension, showPreview, showStatistics);
+	const files = await scanWorkspace(getSettings().ignore);
+	await applyProcessorToWorkspace(deadCodeProcessor, files, getLanguageByExtension);
 }
 
 export async function removeEmptyLinesWorkspace() {
-	const settings = getSettings();
-	const files = await scanWorkspace(settings.ignore);
-	await applyProcessorToWorkspace(emptyLinesProcessor, settings, files, getLanguageByExtension, showPreview, showStatistics);
+	const files = await scanWorkspace(getSettings().ignore);
+	await applyProcessorToWorkspace(emptyLinesProcessor, files, getLanguageByExtension);
 }
 
 export async function removeTrailingSpacesWorkspace() {
-	const settings = getSettings();
-	const files = await scanWorkspace(settings.ignore);
-	await applyProcessorToWorkspace(trailingSpacesProcessor, settings, files, getLanguageByExtension, showPreview, showStatistics);
+	const files = await scanWorkspace(getSettings().ignore);
+	await applyProcessorToWorkspace(trailingSpacesProcessor, files, getLanguageByExtension);
 }
 
 export async function removeConsoleLogsWorkspace() {
-	const settings = getSettings();
-	const files = await scanWorkspace(settings.ignore);
-	await applyProcessorToWorkspace(consoleLogProcessor, settings, files, getLanguageByExtension, showPreview, showStatistics);
+	const files = await scanWorkspace(getSettings().ignore);
+	await applyProcessorToWorkspace(consoleLogProcessor, files, getLanguageByExtension);
 }
 
 export async function sortImportsWorkspace() {
-	const settings = getSettings();
-	const files = await scanWorkspace(settings.ignore);
-	await applyProcessorToWorkspace(sortImportsProcessor, settings, files, getLanguageByExtension, showPreview, showStatistics);
+	const files = await scanWorkspace(getSettings().ignore);
+	await applyProcessorToWorkspace(sortImportsProcessor, files, getLanguageByExtension);
 }
 
 export async function convertIndentWorkspace() {
-	const settings = getSettings();
-	const files = await scanWorkspace(settings.ignore);
-	await applyProcessorToWorkspace(indentProcessor, settings, files, getLanguageByExtension, showPreview, showStatistics);
+	const files = await scanWorkspace(getSettings().ignore);
+	await applyProcessorToWorkspace(indentProcessor, files, getLanguageByExtension);
 }
 
 

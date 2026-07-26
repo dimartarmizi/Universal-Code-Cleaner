@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { getSettings } from '../settings/config';
-import { showPreview, showStatistics } from '../preview/diffPreview';
 
 export async function removeEmptyFoldersWorkspace() {
 	const settings = getSettings();
@@ -66,15 +65,12 @@ export async function removeEmptyFoldersWorkspace() {
 		return;
 	}
 
-	const scanResults = emptyFolders.map(dir => ({
-		filePath: dir,
-		languageId: 'folder',
-		commentCount: 1,
-		commentsSize: 0
-	}));
-
-	const proceed = await showPreview(scanResults, 'empty folders', 'delete');
-	if (!proceed) {
+	const proceed = await vscode.window.showWarningMessage(
+		`Found ${emptyFolders.length} empty folders. Do you want to delete them?`,
+		{ modal: true },
+		'Delete'
+	);
+	if (proceed !== 'Delete') {
 		return;
 	}
 
@@ -95,5 +91,7 @@ export async function removeEmptyFoldersWorkspace() {
 	}
 
 	const duration = (Date.now() - startTime) / 1000;
-	showStatistics(deletedCount, deletedCount, duration, 'empty folders');
+	vscode.window.showInformationMessage(
+		`Finished!\nFolders deleted: ${deletedCount}\nElapsed: ${duration.toFixed(1)} seconds`
+	);
 }
