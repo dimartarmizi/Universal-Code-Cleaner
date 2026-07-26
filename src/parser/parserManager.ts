@@ -4,10 +4,53 @@ export interface CommentSpan {
 	text: string;
 }
 
-export function parseComments(text: string, commentType: 'c' | 'python' | 'html' | 'css' | 'ini'): CommentSpan[] {
+export function parseComments(text: string, commentType: 'c' | 'python' | 'html' | 'css' | 'ini' | 'sfc'): CommentSpan[] {
 	const spans: CommentSpan[] = [];
 	const len = text.length;
 	let i = 0;
+
+	if (commentType === 'sfc') {
+		const scriptRegex = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
+		const styleRegex = /<style\b[^>]*>([\s\S]*?)<\/style>/gi;
+
+		const blocks: { start: number; end: number; type: 'c' | 'css' }[] = [];
+		let match;
+
+		while ((match = scriptRegex.exec(text)) !== null) {
+			const contentStart = match.index + match[0].indexOf(match[1]);
+			blocks.push({ start: contentStart, end: contentStart + match[1].length, type: 'c' });
+		}
+
+		styleRegex.lastIndex = 0;
+		while ((match = styleRegex.exec(text)) !== null) {
+			const contentStart = match.index + match[0].indexOf(match[1]);
+			blocks.push({ start: contentStart, end: contentStart + match[1].length, type: 'css' });
+		}
+
+		blocks.sort((a, b) => a.start - b.start);
+
+		let lastIndex = 0;
+		const parseSubSection = (subText: string, type: 'html' | 'c' | 'css', offset: number) => {
+			const subSpans = parseComments(subText, type);
+			for (const s of subSpans) {
+				spans.push({ start: s.start + offset, end: s.end + offset, text: s.text });
+			}
+		};
+
+		for (const block of blocks) {
+			if (block.start > lastIndex) {
+				parseSubSection(text.substring(lastIndex, block.start), 'html', lastIndex);
+			}
+			parseSubSection(text.substring(block.start, block.end), block.type, block.start);
+			lastIndex = block.end;
+		}
+
+		if (lastIndex < len) {
+			parseSubSection(text.substring(lastIndex), 'html', lastIndex);
+		}
+
+		return spans;
+	}
 
 	while (i < len) {
 		if (commentType === 'c') {

@@ -1,7 +1,7 @@
 export interface LanguageConfig {
 	id: string;
 	extensions: string[];
-	commentType: 'c' | 'python' | 'html' | 'css' | 'ini';
+	commentType: 'c' | 'python' | 'html' | 'css' | 'ini' | 'sfc';
 }
 
 export const LANGUAGES: LanguageConfig[] = [
@@ -15,7 +15,8 @@ export const LANGUAGES: LanguageConfig[] = [
 	{ id: 'java', extensions: ['.java'], commentType: 'c' },
 	{ id: 'csharp', extensions: ['.cs'], commentType: 'c' },
 	{ id: 'cpp', extensions: ['.cpp', '.hpp', '.c', '.h'], commentType: 'c' },
-	{ id: 'html', extensions: ['.html', '.htm', '.vue', '.blade.php'], commentType: 'html' },
+	{ id: 'sfc', extensions: ['.vue', '.svelte', '.astro', '.riot'], commentType: 'sfc' },
+	{ id: 'html', extensions: ['.html', '.htm', '.blade.php'], commentType: 'html' },
 	{ id: 'css', extensions: ['.css', '.scss', '.sass', '.less'], commentType: 'css' },
 	{ id: 'yaml', extensions: ['.yaml', '.yml'], commentType: 'python' },
 	{ id: 'ruby', extensions: ['.rb'], commentType: 'python' },
