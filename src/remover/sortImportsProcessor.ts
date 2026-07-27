@@ -62,6 +62,55 @@ export class SortImportsProcessor implements CodeCleanerProcessor {
 		return (open['{'] || 0) === 0 && (open['('] || 0) === 0 && (open['['] || 0) === 0;
 	}
 
+	private isImportStatementComplete(stmt: string, nextLine?: string): boolean {
+		const trimmed = stmt.trim();
+		if (!trimmed) {
+			return false;
+		}
+
+		if (trimmed.endsWith(';')) {
+			return true;
+		}
+
+		if (nextLine !== undefined && this.importPattern.test(nextLine)) {
+			return true;
+		}
+
+		const hasFromLiteral = /\bfrom\s+('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*`)\s*$/.test(trimmed);
+		if (hasFromLiteral) {
+			return true;
+		}
+
+		const isSideEffectImport = /^\s*import\s+('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*`)\s*$/.test(trimmed);
+		if (isSideEffectImport) {
+			return true;
+		}
+
+		const isPythonImport = /^\s*(import\s+\S+|from\s+\S+\s+import\s+\S+)/.test(trimmed);
+		if (isPythonImport && nextLine !== undefined && !/^\s+/.test(nextLine)) {
+			return true;
+		}
+
+		const isCppInclude = /^\s*#include\s+(<[^>]+>|"[^"]+")\s*$/.test(trimmed);
+		if (isCppInclude) {
+			return true;
+		}
+
+		const isCssImport = /^\s*@import\s+(['"`]|\burl\()/.test(trimmed);
+		if (isCssImport) {
+			return true;
+		}
+
+		if (nextLine !== undefined) {
+			const trimmedNext = nextLine.trim();
+			if (trimmedNext === '' || !/^[ \t]+/.test(nextLine)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	private readImportStatement(lines: string[], startIdx: number): { endLine: number; statement: string; sortKey: string } | null {
 		const firstLine = lines[startIdx];
 		if (!this.importPattern.test(firstLine)) {
@@ -73,9 +122,8 @@ export class SortImportsProcessor implements CodeCleanerProcessor {
 		this.countBrackets(current, open);
 		let endLine = startIdx;
 
-		const endsWithSemicolon = (s: string) => s.trimEnd().endsWith(';');
-
-		if (this.isOpenBalanced(open) && endsWithSemicolon(current)) {
+		const nextLine = startIdx + 1 < lines.length ? lines[startIdx + 1] : undefined;
+		if (this.isOpenBalanced(open) && this.isImportStatementComplete(current, nextLine)) {
 			return {
 				endLine: startIdx,
 				statement: current.trim(),
@@ -88,7 +136,8 @@ export class SortImportsProcessor implements CodeCleanerProcessor {
 			this.countBrackets(lines[i], open);
 			endLine = i;
 
-			if (this.isOpenBalanced(open) && endsWithSemicolon(lines[i])) {
+			const next = i + 1 < lines.length ? lines[i + 1] : undefined;
+			if (this.isOpenBalanced(open) && this.isImportStatementComplete(current, next)) {
 				const stmt = current.trim();
 				return {
 					endLine,
