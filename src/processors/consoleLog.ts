@@ -1,6 +1,6 @@
+import { getSettings } from '../core/config';
+import { CodeCleanerProcessor } from './types';
 import * as vscode from 'vscode';
-import { CodeCleanerProcessor } from './IProcessor';
-import { getSettings } from '../settings/config';
 
 export class ConsoleLogProcessor implements CodeCleanerProcessor {
 	readonly name = 'ConsoleLog';

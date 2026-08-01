@@ -1,5 +1,5 @@
+import { CodeCleanerProcessor } from '../processors/types';
 import * as vscode from 'vscode';
-import { CodeCleanerProcessor } from './IProcessor';
 
 export async function applyProcessorToEditor(editor: vscode.TextEditor, processor: CodeCleanerProcessor) {
 	const document = editor.document;
@@ -23,9 +23,9 @@ export async function applyProcessorToEditor(editor: vscode.TextEditor, processo
 		return;
 	}
 
-	const { treeProvider, previewContentProvider, computeCleanedContent } = require('../preview/previewManager');
+	const { treeProvider, previewContentProvider, computeCleanedContent } = require('../ui/manager');
 	if (treeProvider && previewContentProvider) {
-		const fileItem: import('../preview/view').FileItem = {
+		const fileItem: import('../ui/sidebar').FileItem = {
 			filePath: document.fileName,
 			relativePath: vscode.workspace.asRelativePath(document.fileName),
 			actionName: actionName,
@@ -45,7 +45,7 @@ export async function applyProcessorToEditor(editor: vscode.TextEditor, processo
 
 export async function applyProcessorToWorkspace(processor: CodeCleanerProcessor, files: string[], getLanguageByExtension: any) {
 	const fileContentsMap = new Map<string, { ranges: vscode.Range[] }>();
-	const fileItems: import('../preview/view').FileItem[] = [];
+	const fileItems: import('../ui/sidebar').FileItem[] = [];
 
 	const nameMap: Record<string, string> = {
 		'Comments': 'comments',
@@ -102,27 +102,15 @@ export async function applyProcessorToWorkspace(processor: CodeCleanerProcessor,
 	});
 
 	if (fileItems.length === 0) {
-		vscode.window.showInformationMessage(`No ${actionName} found in the workspace.`);
+		vscode.window.showInformationMessage(`No ${actionName} found to process in workspace.`);
 		return;
 	}
 
-	const { treeProvider, previewContentProvider, computeCleanedContent } = require('../preview/previewManager');
-	if (treeProvider && previewContentProvider) {
+	const { treeProvider } = require('../ui/manager');
+	if (treeProvider) {
 		treeProvider.clearCollapseStates();
 		treeProvider.updateItems(fileItems);
-		for (const item of fileItems) {
-			try {
-				let doc = vscode.workspace.textDocuments.find(d => d.fileName === item.filePath);
-				if (!doc) {
-					doc = await vscode.workspace.openTextDocument(item.filePath);
-				}
-				const cleaned = computeCleanedContent(doc, processor, item.ranges);
-				const previewUri = vscode.Uri.parse(`code-cleaner-preview:${item.filePath}`);
-				previewContentProvider.updatePreview(previewUri, cleaned);
-			} catch (e) {
-			}
-		}
-		vscode.window.showInformationMessage(`Found ${fileItems.length} files with ${actionName}. Please check the Code Cleaner sidebar panel to review and apply changes.`);
-		return;
+		const totalRanges = fileItems.reduce((acc, item) => acc + item.ranges.length, 0);
+		vscode.window.showInformationMessage(`Found ${totalRanges} ${actionName} across ${fileItems.length} files. Please check the Code Cleaner sidebar panel to review and apply changes.`);
 	}
 }

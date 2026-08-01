@@ -1,5 +1,5 @@
+import { CodeCleanerProcessor } from './types';
 import * as vscode from 'vscode';
-import { CodeCleanerProcessor } from './IProcessor';
 
 interface ImportBlock {
 	startLine: number;

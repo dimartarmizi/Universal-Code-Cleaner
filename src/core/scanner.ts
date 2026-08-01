@@ -1,5 +1,5 @@
-import * as vscode from 'vscode';
 import fg from 'fast-glob';
+import * as vscode from 'vscode';
 
 export async function scanWorkspace(ignorePatterns: string[]): Promise<string[]> {
 	const folders = vscode.workspace.workspaceFolders;

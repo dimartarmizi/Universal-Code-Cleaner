@@ -1,0 +1,17 @@
+.vscode/**
+.vscode-test/**
+src/**
+out/**/*.map
+out/commands/**
+out/core/**
+out/language/**
+out/parser/**
+out/preview/**
+out/processors/**
+out/scanner/**
+out/settings/**
+out/ui/**
+node_modules/**
+tsconfig.json
+media/demo.gif
+.gitignore

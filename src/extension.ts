@@ -1,4 +1,3 @@
-import * as vscode from 'vscode';
 import {
 	removeCommentsCurrentFile,
 	removeDeadCodeCurrentFile,
@@ -7,7 +6,8 @@ import {
 	removeConsoleLogsCurrentFile,
 	sortImportsCurrentFile,
 	convertIndentCurrentFile
-} from './commands/cleanCurrentFile';
+} from './commands/file';
+import { removeEmptyFilesWorkspace, removeEmptyFoldersWorkspace } from './commands/structural';
 import {
 	removeCommentsWorkspace,
 	removeDeadCodeWorkspace,
@@ -16,21 +16,20 @@ import {
 	removeConsoleLogsWorkspace,
 	sortImportsWorkspace,
 	convertIndentWorkspace
-} from './commands/cleanWorkspace';
-import { removeEmptyFilesWorkspace } from './commands/cleanEmptyFiles';
-import { removeEmptyFoldersWorkspace } from './commands/cleanEmptyFolders';
-import { UnifiedViewProvider, FileItem } from './preview/view';
-import { PreviewContentProvider } from './preview/previewContentProvider';
-import { setTreeProviders, computeCleanedContent } from './preview/previewManager';
-import { CommentProcessor } from './remover/commentProcessor';
-import { DeadCodeProcessor } from './remover/deadCodeProcessor';
-import { EmptyLinesProcessor } from './remover/emptyLinesProcessor';
-import { TrailingSpacesProcessor } from './remover/trailingSpacesProcessor';
-import { ConsoleLogProcessor } from './remover/consoleLogProcessor';
-import { SortImportsProcessor } from './remover/sortImportsProcessor';
-import { IndentProcessor } from './remover/indentProcessor';
-import { getSettings } from './settings/config';
+} from './commands/workspace';
+import { getSettings } from './core/config';
+import { CommentProcessor } from './processors/comment';
+import { ConsoleLogProcessor } from './processors/consoleLog';
+import { DeadCodeProcessor } from './processors/deadCode';
+import { EmptyLinesProcessor } from './processors/emptyLines';
+import { IndentProcessor } from './processors/indent';
+import { SortImportsProcessor } from './processors/sortImports';
+import { TrailingSpacesProcessor } from './processors/trailingSpaces';
+import { setTreeProviders, computeCleanedContent } from './ui/manager';
+import { PreviewContentProvider } from './ui/provider';
+import { UnifiedViewProvider, FileItem } from './ui/sidebar';
 import * as fs from 'fs';
+import * as vscode from 'vscode';
 
 async function promptScopeAndExecute(
 	actionName: string,
@@ -116,7 +115,7 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand('codeCleaner.toggleFileItem', (item: import('./preview/view').TreeItem) => {
+		vscode.commands.registerCommand('codeCleaner.toggleFileItem', (item: import('./ui/sidebar').TreeItem) => {
 			item.fileItem.checked = !item.fileItem.checked;
 			if (item.fileItem.lineItems) {
 				for (const line of item.fileItem.lineItems) {
@@ -128,7 +127,7 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand('codeCleaner.dismissLineItem', (item: import('./preview/view').LineItemNode) => {
+		vscode.commands.registerCommand('codeCleaner.dismissLineItem', (item: import('./ui/sidebar').LineItemNode) => {
 			const fileItem = item.lineItem.fileItem;
 			fileItem.ranges = fileItem.ranges.filter(r => r !== item.lineItem.range);
 			if (fileItem.lineItems) {
@@ -145,7 +144,7 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand('codeCleaner.dismissFileItem', (item: import('./preview/view').TreeItem) => {
+		vscode.commands.registerCommand('codeCleaner.dismissFileItem', (item: import('./ui/sidebar').TreeItem) => {
 			const fileItem = item.fileItem;
 			const remaining = treeProvider.getItems().filter(i => i !== fileItem);
 			treeProvider.updateItems(remaining);
@@ -153,7 +152,7 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand('codeCleaner.dismissFolderItem', (item: import('./preview/view').FolderItem) => {
+		vscode.commands.registerCommand('codeCleaner.dismissFolderItem', (item: import('./ui/sidebar').FolderItem) => {
 			const folderPrefix = item.path + '/';
 			const remaining = treeProvider.getItems().filter(fileItem =>
 				fileItem.relativePath !== item.path && !fileItem.relativePath.startsWith(folderPrefix)
@@ -163,7 +162,7 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand('codeCleaner.applySingleFolderItem', async (item: import('./preview/view').FolderItem) => {
+		vscode.commands.registerCommand('codeCleaner.applySingleFolderItem', async (item: import('./ui/sidebar').FolderItem) => {
 			const folderPrefix = item.path + '/';
 			const folderFiles = treeProvider.getItems().filter(fileItem =>
 				fileItem.relativePath === item.path || fileItem.relativePath.startsWith(folderPrefix)
@@ -269,7 +268,7 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand('codeCleaner.applySingleLineItem', async (item: import('./preview/view').LineItemNode) => {
+		vscode.commands.registerCommand('codeCleaner.applySingleLineItem', async (item: import('./ui/sidebar').LineItemNode) => {
 			const fileItem = item.lineItem.fileItem;
 			const settings = getSettings();
 
@@ -347,7 +346,7 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand('codeCleaner.applySingleFileItem', async (item: import('./preview/view').TreeItem) => {
+		vscode.commands.registerCommand('codeCleaner.applySingleFileItem', async (item: import('./ui/sidebar').TreeItem) => {
 			const fileItem = item.fileItem;
 			const settings = getSettings();
 			const processors: Record<string, any> = {
@@ -457,18 +456,35 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('codeCleaner.runActionFromSidebar', async () => {
 			const actionChoice = await vscode.window.showQuickPick(
 				[
-					{ label: '$(comment-discussion) Remove Comments', id: 'codeCleaner.removeComments' },
-					{ label: '$(bug) Remove Dead Code', id: 'codeCleaner.removeDeadCode' },
-					{ label: '$(whitespace) Remove Empty Lines', id: 'codeCleaner.removeEmptyLines' },
-					{ label: '$(symbol-keyword) Remove Trailing Spaces', id: 'codeCleaner.removeTrailingSpaces' },
-					{ label: '$(terminal) Remove Console Logs', id: 'codeCleaner.removeConsoleLogs' },
-					{ label: '$(references) Sort Imports', id: 'codeCleaner.sortImports' },
-					{ label: '$(indent) Convert Indentation', id: 'codeCleaner.convertIndent' }
+					{ label: '$(comment-discussion) Remove Comments', id: 'codeCleaner.removeComments', requiresScope: true },
+					{ label: '$(bug) Remove Dead Code', id: 'codeCleaner.removeDeadCode', requiresScope: true },
+					{ label: '$(whitespace) Remove Empty Lines', id: 'codeCleaner.removeEmptyLines', requiresScope: true },
+					{ label: '$(symbol-keyword) Remove Trailing Spaces', id: 'codeCleaner.removeTrailingSpaces', requiresScope: true },
+					{ label: '$(terminal) Remove Console Logs', id: 'codeCleaner.removeConsoleLogs', requiresScope: true },
+					{ label: '', kind: vscode.QuickPickItemKind.Separator },
+					{ label: '$(references) Sort Imports', id: 'codeCleaner.sortImports', requiresScope: true },
+					{ label: '$(indent) Convert Indentation', id: 'codeCleaner.convertIndent', requiresScope: true },
+					{ label: '', kind: vscode.QuickPickItemKind.Separator },
+					{ label: '$(file) Remove Empty Files', id: 'codeCleaner.removeEmptyFiles', requiresScope: false },
+					{ label: '$(folder) Remove Empty Folders', id: 'codeCleaner.removeEmptyFolders', requiresScope: false }
 				],
 				{ placeHolder: 'Select a clean code action to run' }
 			);
 
-			if (!actionChoice) {
+			if (!actionChoice || !actionChoice.id) {
+				return;
+			}
+
+			if (!actionChoice.requiresScope) {
+				lastCommandId = actionChoice.id;
+				const directCommands: Record<string, () => Promise<void>> = {
+					'codeCleaner.removeEmptyFiles': removeEmptyFilesWorkspace,
+					'codeCleaner.removeEmptyFolders': removeEmptyFoldersWorkspace
+				};
+				const directAction = directCommands[actionChoice.id];
+				if (directAction) {
+					await directAction();
+				}
 				return;
 			}
 

@@ -24,7 +24,6 @@ export const LANGUAGES: LanguageConfig[] = [
 ];
 
 export function getLanguageByExtension(filename: string): LanguageConfig | undefined {
-
 	const ext = filename.substring(filename.lastIndexOf('.')).toLowerCase();
 	return LANGUAGES.find(lang => lang.extensions.includes(ext));
 }

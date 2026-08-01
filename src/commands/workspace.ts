@@ -1,14 +1,14 @@
-import { getLanguageByExtension } from '../language/languageRegistry';
-import { getSettings } from '../settings/config';
-import { scanWorkspace } from '../scanner/workspaceScanner';
-import { CommentProcessor } from '../remover/commentProcessor';
-import { DeadCodeProcessor } from '../remover/deadCodeProcessor';
-import { EmptyLinesProcessor } from '../remover/emptyLinesProcessor';
-import { TrailingSpacesProcessor } from '../remover/trailingSpacesProcessor';
-import { ConsoleLogProcessor } from '../remover/consoleLogProcessor';
-import { SortImportsProcessor } from '../remover/sortImportsProcessor';
-import { IndentProcessor } from '../remover/indentProcessor';
-import { applyProcessorToWorkspace } from '../remover/cleanerEngine';
+import { getSettings } from '../core/config';
+import { applyProcessorToWorkspace } from '../core/engine';
+import { getLanguageByExtension } from '../core/registry';
+import { scanWorkspace } from '../core/scanner';
+import { CommentProcessor } from '../processors/comment';
+import { ConsoleLogProcessor } from '../processors/consoleLog';
+import { DeadCodeProcessor } from '../processors/deadCode';
+import { EmptyLinesProcessor } from '../processors/emptyLines';
+import { IndentProcessor } from '../processors/indent';
+import { SortImportsProcessor } from '../processors/sortImports';
+import { TrailingSpacesProcessor } from '../processors/trailingSpaces';
 
 const commentProcessor = new CommentProcessor();
 const deadCodeProcessor = new DeadCodeProcessor();
@@ -52,5 +52,3 @@ export async function convertIndentWorkspace() {
 	const files = await scanWorkspace(getSettings().ignore);
 	await applyProcessorToWorkspace(indentProcessor, files, getLanguageByExtension);
 }
-
-

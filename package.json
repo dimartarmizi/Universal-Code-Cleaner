@@ -1,16 +1,37 @@
 {
   "name": "universal-code-cleaner",
   "displayName": "Universal Code Cleaner",
-  "description": "Remove comments and clean unused code safely from an entire workspace.",
+  "description": "Sanitize, clean, and optimize codebases by removing comments, dead code, empty lines, trailing spaces, and console logs safely.",
   "version": "1.0.0",
   "publisher": "dimartarmizi",
   "author": "Dimar Tarmizi",
+  "icon": "media/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dimartarmizi/universal-code-cleaner"
+  },
+  "license": "MIT",
   "engines": {
     "vscode": "^1.80.0"
   },
   "categories": [
+    "Formatters",
+    "Linters",
     "Other"
   ],
+  "keywords": [
+    "cleaner",
+    "comments",
+    "dead code",
+    "formatter",
+    "unused code",
+    "console log",
+    "trailing spaces"
+  ],
+  "bugs": {
+    "url": "https://github.com/dimartarmizi/universal-code-cleaner/issues"
+  },
+  "homepage": "https://github.com/dimartarmizi/universal-code-cleaner#readme",
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
@@ -139,7 +160,7 @@
         {
           "id": "code-cleaner-view-container",
           "title": "Code Cleaner",
-          "icon": "$(rocket)"
+          "icon": "media/cleaner.svg"
         }
       ]
     },
@@ -149,10 +170,16 @@
           "id": "codeCleanerSidebar",
           "name": "Code Cleaner",
           "type": "tree",
-          "icon": "$(rocket)"
+          "icon": "media/cleaner.svg"
         }
       ]
     },
+    "viewsWelcome": [
+      {
+        "view": "codeCleanerSidebar",
+        "contents": "No active scan results.\n\nClick $(play-circle) above or the button below to run a cleaning action on your file or workspace.\n\n[$(play-circle) Run Clean Action](command:codeCleaner.runActionFromSidebar)"
+      }
+    ],
     "menus": {
       "view/item/context": [
         {
@@ -288,7 +315,10 @@
         "codeCleaner.indent.style": {
           "default": "tab",
           "description": "Target indentation style (tab or space).",
-          "enum": ["tab", "space"],
+          "enum": [
+            "tab",
+            "space"
+          ],
           "type": "string"
         },
         "codeCleaner.indent.size": {
@@ -301,13 +331,15 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run package",
     "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./"
+    "watch": "tsc -watch -p ./",
+    "package": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --minify"
   },
   "devDependencies": {
     "@types/node": "18.x",
     "@types/vscode": "^1.80.0",
+    "esbuild": "^0.28.1",
     "typescript": "^5.1.6"
   },
   "dependencies": {

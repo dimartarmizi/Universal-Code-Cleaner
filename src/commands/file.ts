@@ -1,12 +1,12 @@
+import { applyProcessorToEditor } from '../core/engine';
+import { CommentProcessor } from '../processors/comment';
+import { ConsoleLogProcessor } from '../processors/consoleLog';
+import { DeadCodeProcessor } from '../processors/deadCode';
+import { EmptyLinesProcessor } from '../processors/emptyLines';
+import { IndentProcessor } from '../processors/indent';
+import { SortImportsProcessor } from '../processors/sortImports';
+import { TrailingSpacesProcessor } from '../processors/trailingSpaces';
 import * as vscode from 'vscode';
-import { CommentProcessor } from '../remover/commentProcessor';
-import { DeadCodeProcessor } from '../remover/deadCodeProcessor';
-import { EmptyLinesProcessor } from '../remover/emptyLinesProcessor';
-import { TrailingSpacesProcessor } from '../remover/trailingSpacesProcessor';
-import { ConsoleLogProcessor } from '../remover/consoleLogProcessor';
-import { SortImportsProcessor } from '../remover/sortImportsProcessor';
-import { IndentProcessor } from '../remover/indentProcessor';
-import { applyProcessorToEditor } from '../remover/cleanerEngine';
 
 const commentProcessor = new CommentProcessor();
 const deadCodeProcessor = new DeadCodeProcessor();
@@ -78,5 +78,3 @@ export async function convertIndentCurrentFile() {
 	}
 	await applyProcessorToEditor(editor, indentProcessor);
 }
-
-

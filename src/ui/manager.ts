@@ -1,7 +1,7 @@
+import { CodeCleanerProcessor } from '../processors/types';
+import { PreviewContentProvider } from './provider';
+import { UnifiedViewProvider } from './sidebar';
 import * as vscode from 'vscode';
-import { CodeCleanerProcessor } from '../remover/IProcessor';
-import { UnifiedViewProvider } from '../preview/view';
-import { PreviewContentProvider } from '../preview/previewContentProvider';
 
 export let treeProvider: UnifiedViewProvider | undefined;
 export let previewContentProvider: PreviewContentProvider | undefined;
