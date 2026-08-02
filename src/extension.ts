@@ -25,11 +25,22 @@ import { EmptyLinesProcessor } from './processors/emptyLines';
 import { IndentProcessor } from './processors/indent';
 import { SortImportsProcessor } from './processors/sortImports';
 import { TrailingSpacesProcessor } from './processors/trailingSpaces';
+import { CodeCleanerProcessor } from './processors/types';
 import { setTreeProviders, computeCleanedContent } from './ui/manager';
 import { PreviewContentProvider } from './ui/provider';
 import { UnifiedViewProvider, FileItem } from './ui/sidebar';
 import * as fs from 'fs';
 import * as vscode from 'vscode';
+
+const PROCESSOR_MAP: Record<string, CodeCleanerProcessor> = {
+	'Comments': new CommentProcessor(),
+	'DeadCode': new DeadCodeProcessor(),
+	'EmptyLines': new EmptyLinesProcessor(),
+	'TrailingSpaces': new TrailingSpacesProcessor(),
+	'ConsoleLog': new ConsoleLogProcessor(),
+	'SortImports': new SortImportsProcessor(),
+	'Indent': new IndentProcessor()
+};
 
 async function promptScopeAndExecute(
 	actionName: string,
@@ -99,6 +110,20 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('codeCleaner.openPreviewDiff', async (item: FileItem, range?: vscode.Range) => {
 			const originalUri = vscode.Uri.file(item.filePath);
 			const previewUri = vscode.Uri.parse(`code-cleaner-preview:${item.filePath}`);
+
+			let doc = vscode.workspace.textDocuments.find(d => d.fileName === item.filePath);
+			if (!doc) {
+				doc = await vscode.workspace.openTextDocument(item.filePath);
+			}
+
+			const processor = PROCESSOR_MAP[item.processorName];
+
+			if (doc && processor) {
+				const activeLines = item.lineItems ? item.lineItems.filter(l => l.checked) : [];
+				const rangesToClean = activeLines.length > 0 ? activeLines.map(l => l.range) : item.ranges;
+				const cleanedText = computeCleanedContent(doc, processor, rangesToClean);
+				previewProvider.updatePreview(previewUri, cleanedText);
+			}
 
 			await vscode.commands.executeCommand('vscode.diff', originalUri, previewUri, `Clean Preview: ${item.relativePath}`);
 
@@ -173,15 +198,6 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 
 			const settings = getSettings();
-			const processors: Record<string, any> = {
-				'Comments': new CommentProcessor(),
-				'DeadCode': new DeadCodeProcessor(),
-				'EmptyLines': new EmptyLinesProcessor(),
-				'TrailingSpaces': new TrailingSpacesProcessor(),
-				'ConsoleLog': new ConsoleLogProcessor(),
-				'SortImports': new SortImportsProcessor(),
-				'Indent': new IndentProcessor()
-			};
 
 			await vscode.window.withProgress({
 				location: vscode.ProgressLocation.Notification,
@@ -191,7 +207,7 @@ export function activate(context: vscode.ExtensionContext) {
 				let index = 0;
 				for (const fileItem of folderFiles) {
 					try {
-						const processor = processors[fileItem.processorName];
+						const processor = PROCESSOR_MAP[fileItem.processorName];
 						if (!processor) {
 							continue;
 						}
@@ -230,7 +246,7 @@ export function activate(context: vscode.ExtensionContext) {
 						}
 					} catch (err) {
 						try {
-							const processor = processors[fileItem.processorName];
+							const processor = PROCESSOR_MAP[fileItem.processorName];
 							let content = fs.readFileSync(fileItem.filePath, 'utf8');
 							let doc = await vscode.workspace.openTextDocument(fileItem.filePath);
 
@@ -272,18 +288,8 @@ export function activate(context: vscode.ExtensionContext) {
 			const fileItem = item.lineItem.fileItem;
 			const settings = getSettings();
 
-			const processors: Record<string, any> = {
-				'Comments': new CommentProcessor(),
-				'DeadCode': new DeadCodeProcessor(),
-				'EmptyLines': new EmptyLinesProcessor(),
-				'TrailingSpaces': new TrailingSpacesProcessor(),
-				'ConsoleLog': new ConsoleLogProcessor(),
-				'SortImports': new SortImportsProcessor(),
-				'Indent': new IndentProcessor()
-			};
-
 			try {
-				const processor = processors[fileItem.processorName];
+				const processor = PROCESSOR_MAP[fileItem.processorName];
 				if (!processor) {
 					return;
 				}
@@ -349,18 +355,9 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('codeCleaner.applySingleFileItem', async (item: import('./ui/sidebar').TreeItem) => {
 			const fileItem = item.fileItem;
 			const settings = getSettings();
-			const processors: Record<string, any> = {
-				'Comments': new CommentProcessor(),
-				'DeadCode': new DeadCodeProcessor(),
-				'EmptyLines': new EmptyLinesProcessor(),
-				'TrailingSpaces': new TrailingSpacesProcessor(),
-				'ConsoleLog': new ConsoleLogProcessor(),
-				'SortImports': new SortImportsProcessor(),
-				'Indent': new IndentProcessor()
-			};
 
 			try {
-				const processor = processors[fileItem.processorName];
+				const processor = PROCESSOR_MAP[fileItem.processorName];
 				if (!processor) {
 					return;
 				}
@@ -532,16 +529,6 @@ export function activate(context: vscode.ExtensionContext) {
 			let modifiedCount = 0;
 			let totalRemoved = 0;
 
-			const processors: Record<string, any> = {
-				'Comments': new CommentProcessor(),
-				'DeadCode': new DeadCodeProcessor(),
-				'EmptyLines': new EmptyLinesProcessor(),
-				'TrailingSpaces': new TrailingSpacesProcessor(),
-				'ConsoleLog': new ConsoleLogProcessor(),
-				'SortImports': new SortImportsProcessor(),
-				'Indent': new IndentProcessor()
-			};
-
 			await vscode.window.withProgress({
 				location: vscode.ProgressLocation.Notification,
 				title: 'Applying selected clean operations...',
@@ -550,7 +537,7 @@ export function activate(context: vscode.ExtensionContext) {
 				let index = 0;
 				for (const item of items) {
 					try {
-						const processor = processors[item.processorName];
+						const processor = PROCESSOR_MAP[item.processorName];
 						if (!processor) {
 							continue;
 						}
@@ -591,7 +578,7 @@ export function activate(context: vscode.ExtensionContext) {
 						totalRemoved += rangesToClean.length;
 					} catch (err) {
 						try {
-							const processor = processors[item.processorName];
+							const processor = PROCESSOR_MAP[item.processorName];
 							let content = fs.readFileSync(item.filePath, 'utf8');
 							let doc = await vscode.workspace.openTextDocument(item.filePath);
 

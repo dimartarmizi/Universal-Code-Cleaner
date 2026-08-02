@@ -2,7 +2,7 @@
   "name": "universal-code-cleaner",
   "displayName": "Universal Code Cleaner",
   "description": "Sanitize, clean, and optimize codebases by removing comments, dead code, empty lines, trailing spaces, and console logs safely.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "dimartarmizi",
   "author": "Dimar Tarmizi",
   "icon": "media/icon.png",
