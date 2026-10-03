@@ -38,6 +38,7 @@ export async function applyProcessorToEditor(editor: vscode.TextEditor, processo
 		const cleaned = computeCleanedContent(document, processor, ranges);
 		const previewUri = vscode.Uri.parse(`code-cleaner-preview:${document.fileName}`);
 		previewContentProvider.updatePreview(previewUri, cleaned);
+		vscode.commands.executeCommand('codeCleanerSidebar.focus');
 		vscode.window.showInformationMessage(`Found ${ranges.length} ${actionName} in this file. Please check the Code Cleaner sidebar panel to review and apply changes.`);
 		return;
 	}
@@ -111,6 +112,7 @@ export async function applyProcessorToWorkspace(processor: CodeCleanerProcessor,
 		treeProvider.clearCollapseStates();
 		treeProvider.updateItems(fileItems);
 		const totalRanges = fileItems.reduce((acc, item) => acc + item.ranges.length, 0);
+		vscode.commands.executeCommand('codeCleanerSidebar.focus');
 		vscode.window.showInformationMessage(`Found ${totalRanges} ${actionName} across ${fileItems.length} files. Please check the Code Cleaner sidebar panel to review and apply changes.`);
 	}
 }
