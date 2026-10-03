@@ -1,3 +1,4 @@
+import { expandToFullLineIfIsolated } from '../core/rangeUtils';
 import { getSettings } from '../core/config';
 import { CodeCleanerProcessor } from './types';
 import * as vscode from 'vscode';
@@ -68,23 +69,7 @@ export class ConsoleLogProcessor implements CodeCleanerProcessor {
 					endOffset = trailingOffset + 1;
 				}
 
-				let rangeStart = document.positionAt(startOffset);
-				let rangeEnd = document.positionAt(endOffset);
-
-				const lineText = document.lineAt(rangeStart.line).text;
-				const beforeMatch = lineText.substring(0, rangeStart.character).trim();
-				const afterMatch = lineText.substring(rangeEnd.character).trim();
-
-				if (beforeMatch === '' && afterMatch === '') {
-					if (rangeStart.line > 0) {
-						const prevLine = document.lineAt(rangeStart.line - 1);
-						rangeStart = new vscode.Position(rangeStart.line - 1, prevLine.text.length);
-					} else if (rangeStart.line < document.lineCount - 1) {
-						rangeEnd = new vscode.Position(rangeStart.line + 1, 0);
-					}
-				}
-
-				ranges.push(new vscode.Range(rangeStart, rangeEnd));
+				ranges.push(expandToFullLineIfIsolated(document, startOffset, endOffset));
 			}
 		}
 

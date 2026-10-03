@@ -1,5 +1,6 @@
 import { getSettings } from '../core/config';
 import { parseComments, CommentSpan } from '../core/parser';
+import { expandToFullLineIfIsolated } from '../core/rangeUtils';
 import { getLanguageByExtension } from '../core/registry';
 import { CodeCleanerProcessor } from './types';
 import * as vscode from 'vscode';
@@ -61,29 +62,28 @@ export class CommentProcessor implements CodeCleanerProcessor {
 		const commentsToRemove = filterComments(rawComments, settings.keep);
 
 		const ranges: vscode.Range[] = [];
+		const isJsx = fileName.endsWith('.tsx') || fileName.endsWith('.jsx');
+
 		for (const comment of commentsToRemove) {
-			let startOffset = comment.start;
-			let endOffset = comment.end;
+			let start = comment.start;
+			let end = comment.end;
 
-			while (startOffset > 0 && (text[startOffset - 1] === ' ' || text[startOffset - 1] === '\t')) {
-				startOffset--;
-			}
-
-			if ((startOffset === 0 || text[startOffset - 1] === '\n' || text[startOffset - 1] === '\r') &&
-				(endOffset === text.length || text[endOffset] === '\n' || text[endOffset] === '\r')) {
-				if (endOffset < text.length) {
-					if (text[endOffset] === '\r' && text[endOffset + 1] === '\n') {
-						endOffset += 2;
-					} else {
-						endOffset += 1;
-					}
+			if (isJsx) {
+				let braceBefore = start - 1;
+				while (braceBefore >= 0 && (text[braceBefore] === ' ' || text[braceBefore] === '\t')) {
+					braceBefore--;
+				}
+				let braceAfter = end;
+				while (braceAfter < text.length && (text[braceAfter] === ' ' || text[braceAfter] === '\t')) {
+					braceAfter++;
+				}
+				if (braceBefore >= 0 && text[braceBefore] === '{' && braceAfter < text.length && text[braceAfter] === '}') {
+					start = braceBefore;
+					end = braceAfter + 1;
 				}
 			}
 
-			ranges.push(new vscode.Range(
-				document.positionAt(startOffset),
-				document.positionAt(endOffset)
-			));
+			ranges.push(expandToFullLineIfIsolated(document, start, end));
 		}
 
 		return ranges;

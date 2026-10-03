@@ -2,6 +2,7 @@ import { CodeCleanerProcessor } from '../processors/types';
 import { PreviewContentProvider } from './provider';
 import { UnifiedViewProvider } from './sidebar';
 import * as vscode from 'vscode';
+import { mergeOverlappingRanges } from '../core/mergeRanges';
 
 export let treeProvider: UnifiedViewProvider | undefined;
 export let previewContentProvider: PreviewContentProvider | undefined;
@@ -28,7 +29,7 @@ export function computeCleanedContent(doc: vscode.TextDocument, processor: CodeC
 	} else if (processor.applyCustomEdit) {
 	}
 
-	const sorted = [...ranges].sort((a, b) => b.start.compareTo(a.start));
+	const sorted = mergeOverlappingRanges(doc, ranges);
 	let text = doc.getText();
 	for (const range of sorted) {
 		const start = doc.offsetAt(range.start);

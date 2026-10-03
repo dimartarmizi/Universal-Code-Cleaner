@@ -359,7 +359,7 @@ export class TreeItem extends vscode.TreeItem {
 		this.contextValue = 'cleanerFileItem';
 		this.resourceUri = vscode.Uri.file(fileItem.filePath);
 		this.iconPath = vscode.ThemeIcon.File;
-		this.id = `${fileItem.relativePath}_${collapsibleState}_v${version}`;
+		this.id = `${fileItem.relativePath}_${collapsibleState}_v${version}_r${fileItem.ranges.length}`;
 	}
 }
 

@@ -1,4 +1,5 @@
 import { getSettings } from '../core/config';
+import { expandToFullLineIfIsolated } from '../core/rangeUtils';
 import { CodeCleanerProcessor } from './types';
 import * as vscode from 'vscode';
 
@@ -31,11 +32,9 @@ export class EmptyLinesProcessor implements CodeCleanerProcessor {
 					if (i === lineCount - 1) {
 						continue;
 					}
-					const startPos = new vscode.Position(i, 0);
-					const endPos = i < lineCount - 1
-						? new vscode.Position(i + 1, 0)
-						: new vscode.Position(i, lineText.length);
-					ranges.push(new vscode.Range(startPos, endPos));
+					const startOffset = document.offsetAt(new vscode.Position(i, 0));
+					const endOffset = document.offsetAt(new vscode.Position(i, lineText.length));
+					ranges.push(expandToFullLineIfIsolated(document, startOffset, endOffset));
 					continue;
 				}
 
@@ -60,11 +59,9 @@ export class EmptyLinesProcessor implements CodeCleanerProcessor {
 				}
 
 				if (consecutiveEmptyCount > maxAllowed || isAfterBlockOpen || isBeforeBlockClose) {
-					const startPos = new vscode.Position(i, 0);
-					const endPos = i < lineCount - 1
-						? new vscode.Position(i + 1, 0)
-						: new vscode.Position(i, lineText.length);
-					ranges.push(new vscode.Range(startPos, endPos));
+					const startOffset = document.offsetAt(new vscode.Position(i, 0));
+					const endOffset = document.offsetAt(new vscode.Position(i, lineText.length));
+					ranges.push(expandToFullLineIfIsolated(document, startOffset, endOffset));
 				}
 			} else {
 				consecutiveEmptyCount = 0;
