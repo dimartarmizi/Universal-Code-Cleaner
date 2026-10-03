@@ -1,6 +1,5 @@
 import {
 	removeCommentsCurrentFile,
-	removeDeadCodeCurrentFile,
 	removeEmptyLinesCurrentFile,
 	removeTrailingSpacesCurrentFile,
 	removeConsoleLogsCurrentFile,
@@ -10,7 +9,6 @@ import {
 import { removeEmptyFilesWorkspace, removeEmptyFoldersWorkspace } from './commands/structural';
 import {
 	removeCommentsWorkspace,
-	removeDeadCodeWorkspace,
 	removeEmptyLinesWorkspace,
 	removeTrailingSpacesWorkspace,
 	removeConsoleLogsWorkspace,
@@ -20,7 +18,6 @@ import {
 import { getSettings } from './core/config';
 import { CommentProcessor } from './processors/comment';
 import { ConsoleLogProcessor } from './processors/consoleLog';
-import { DeadCodeProcessor } from './processors/deadCode';
 import { EmptyLinesProcessor } from './processors/emptyLines';
 import { IndentProcessor } from './processors/indent';
 import { SortImportsProcessor } from './processors/sortImports';
@@ -36,7 +33,6 @@ import { getActiveWorkspaceFolder } from './core/scanner';
 
 const PROCESSOR_MAP: Record<string, CodeCleanerProcessor> = {
 	'Comments': new CommentProcessor(),
-	'DeadCode': new DeadCodeProcessor(),
 	'EmptyLines': new EmptyLinesProcessor(),
 	'TrailingSpaces': new TrailingSpacesProcessor(),
 	'ConsoleLog': new ConsoleLogProcessor(),
@@ -512,7 +508,6 @@ export function activate(context: vscode.ExtensionContext) {
 			const actionChoice = await vscode.window.showQuickPick(
 				[
 					{ label: '$(comment-discussion) Remove Comments', id: 'codeCleaner.removeComments', requiresScope: true },
-					{ label: '$(bug) Remove Dead Code', id: 'codeCleaner.removeDeadCode', requiresScope: true },
 					{ label: '$(whitespace) Remove Empty Lines', id: 'codeCleaner.removeEmptyLines', requiresScope: true },
 					{ label: '$(symbol-keyword) Remove Trailing Spaces', id: 'codeCleaner.removeTrailingSpaces', requiresScope: true },
 					{ label: '$(terminal) Remove Console Logs', id: 'codeCleaner.removeConsoleLogs', requiresScope: true },
@@ -588,7 +583,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 			const mapCommands: Record<string, () => Promise<void>> = {
 				'codeCleaner.removeComments': scopeChoice.scope === 'current' ? removeCommentsCurrentFile : () => removeCommentsWorkspace(targetFolder),
-				'codeCleaner.removeDeadCode': scopeChoice.scope === 'current' ? removeDeadCodeCurrentFile : () => removeDeadCodeWorkspace(targetFolder),
 				'codeCleaner.removeEmptyLines': scopeChoice.scope === 'current' ? removeEmptyLinesCurrentFile : () => removeEmptyLinesWorkspace(targetFolder),
 				'codeCleaner.removeTrailingSpaces': scopeChoice.scope === 'current' ? removeTrailingSpacesCurrentFile : () => removeTrailingSpacesWorkspace(targetFolder),
 				'codeCleaner.removeConsoleLogs': scopeChoice.scope === 'current' ? removeConsoleLogsCurrentFile : () => removeConsoleLogsWorkspace(targetFolder),
@@ -714,13 +708,6 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	);
 
-	const disposableRemoveDeadCode = vscode.commands.registerCommand(
-		'codeCleaner.removeDeadCode',
-		async () => {
-			await promptScopeAndExecute('Remove Dead Code', removeDeadCodeCurrentFile, removeDeadCodeWorkspace);
-		}
-	);
-
 	const disposableRemoveEmptyLines = vscode.commands.registerCommand(
 		'codeCleaner.removeEmptyLines',
 		async () => {
@@ -780,7 +767,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(
 		disposableRemoveComments,
-		disposableRemoveDeadCode,
 		disposableRemoveEmptyLines,
 		disposableRemoveTrailingSpaces,
 		disposableRemoveConsoleLogs,

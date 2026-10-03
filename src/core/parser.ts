@@ -111,16 +111,6 @@ export function parseComments(text: string, commentType: 'c' | 'python' | 'html'
 				continue;
 			}
 
-			if (commentType === 'php' && char === '#') {
-				const start = i;
-				i++;
-				while (i < len && text[i] !== '\n' && text[i] !== '\r') {
-					i++;
-				}
-				spans.push({ start, end: i, text: text.substring(start, i) });
-				continue;
-			}
-
 			i++;
 		} else if (commentType === 'blade') {
 			const char = text[i];
@@ -210,16 +200,6 @@ export function parseComments(text: string, commentType: 'c' | 'python' | 'html'
 				continue;
 			}
 
-			if (char === '#') {
-				const start = i;
-				i++;
-				while (i < len && text[i] !== '\n' && text[i] !== '\r') {
-					i++;
-				}
-				spans.push({ start, end: i, text: text.substring(start, i) });
-				continue;
-			}
-
 			i++;
 		} else if (commentType === 'html') {
 			const char = text[i];
@@ -287,7 +267,7 @@ export function parseComments(text: string, commentType: 'c' | 'python' | 'html'
 			i++;
 		} else if (commentType === 'ini') {
 			const char = text[i];
-			if (char === '#' || char === ';') {
+			if (char === ';') {
 				const start = i;
 				i++;
 				while (i < len && text[i] !== '\n' && text[i] !== '\r') {

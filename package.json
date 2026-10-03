@@ -1,7 +1,7 @@
 {
   "name": "universal-code-cleaner",
   "displayName": "Universal Code Cleaner",
-  "description": "Sanitize, clean, and optimize codebases by removing comments, dead code, empty lines, trailing spaces, and console logs safely.",
+  "description": "Sanitize, clean, and optimize codebases by removing comments, empty lines, trailing spaces, and console logs safely.",
   "version": "1.1.0",
   "publisher": "dimartarmizi",
   "author": "Dimar Tarmizi",
@@ -22,7 +22,6 @@
   "keywords": [
     "cleaner",
     "comments",
-    "dead code",
     "formatter",
     "unused code",
     "console log",
@@ -39,10 +38,6 @@
       {
         "command": "codeCleaner.removeComments",
         "title": "Clean Code: Remove Comments"
-      },
-      {
-        "command": "codeCleaner.removeDeadCode",
-        "title": "Clean Code: Remove Dead Code"
       },
       {
         "command": "codeCleaner.removeEmptyLines",

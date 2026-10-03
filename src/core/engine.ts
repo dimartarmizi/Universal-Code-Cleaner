@@ -7,7 +7,6 @@ export async function applyProcessorToEditor(editor: vscode.TextEditor, processo
 
 	const nameMap: Record<string, string> = {
 		'Comments': 'comments',
-		'DeadCode': 'dead code items',
 		'EmptyLines': 'empty lines',
 		'TrailingSpaces': 'trailing spaces',
 		'EmptyFiles': 'empty files',
@@ -50,7 +49,6 @@ export async function applyProcessorToWorkspace(processor: CodeCleanerProcessor,
 
 	const nameMap: Record<string, string> = {
 		'Comments': 'comments',
-		'DeadCode': 'dead code items',
 		'EmptyLines': 'empty lines',
 		'TrailingSpaces': 'trailing spaces',
 		'EmptyFiles': 'empty files',

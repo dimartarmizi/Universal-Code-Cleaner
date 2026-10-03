@@ -6,7 +6,7 @@
 
 [![Visual Studio Code](https://img.shields.io/badge/VS%20Code-007ACC?style=for-the-badge)](https://code.visualstudio.com/) [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
-A powerful, highly modular, and safe Visual Studio Code extension to sanitize, clean, and optimize your codebase. Instantly remove comments, dead code, excessive empty lines, trailing whitespaces, console logs, and empty structural elements either from your current active file or across the entire workspace.
+A powerful, highly modular, and safe Visual Studio Code extension to sanitize, clean, and optimize your codebase. Instantly remove comments, excessive empty lines, trailing whitespaces, console logs, and empty structural elements either from your current active file or across the entire workspace.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/dimartarmizi/universal-code-cleaner/main/media/demo.gif" alt="Universal Code Cleaner Demo">
@@ -21,32 +21,28 @@ Identify and strip single-line and multi-line comments across C/C++/JavaScript/T
 * **Keep Directives**: Respects important statements like `eslint-disable`, `ts-ignore`, `prettier-ignore`, and standard software licenses.
 * **Configure Keywords**: Easily add custom ignore keywords via extension settings.
 
-### 2. Remove Dead Code (Unused Code)
-Leverages VS Code's active linter diagnostic tags (`vscode.DiagnosticTag.Unnecessary`) to clean unused imports, variables, functions, and symbols.
-* **Non-Destructive Same-Line Removal**: Targets and removes only the specific unused tokens along with their keyword prefixes (like `const`, `let`, `import`, `use`) and semicolons, instead of wiping out the entire line.
-
-### 3. Smart Empty Line Removal
+### 2. Smart Empty Line Removal
 Reduces consecutive blank lines to standard code formatting rules.
 * Keeps at most **1 empty line** to maintain readability.
 * **Block Aware**: Automatically deletes *any* empty lines immediately adjacent to block openers (`{`, `[`, `(`, `:`) and block closers (`}`, `]`, `)`, `:`).
 
-### 4. Remove Trailing Spaces
+### 3. Remove Trailing Spaces
 Instantly deletes whitespaces, tabs, and trailing indentations lingering at the end of code lines.
 
-### 5. Remove Console Logs (Safe Mode)
+### 4. Remove Console Logs (Safe Mode)
 Performs safe cleanup of browser/Node console commands:
 * **Removes**: `console.log`, `console.debug`, `console.warn`, `console.info`, `console.trace`, and `console.dir`.
 * **Retains**: `console.error` is kept intact as it is vital for production error logging and telemetry.
 
-### 6. Sort Imports (Universal)
+### 5. Sort Imports (Universal)
 Organizes and sorts your imports alphabetically, removing duplicates and cleaning empty lines inside the import block.
 * **Universal Language Support**: Detects and sorts imports across JavaScript, TypeScript, Python (`import` & `from`), Go (`import`), Rust (`use`), PHP (`use`), CSS/SCSS (`@import`), and C/C++ (`#include`).
 
-### 7. Workspace Directory Sanitization
+### 6. Workspace Directory Sanitization
 * **Remove Empty Files**: Safely deletes 0-byte or whitespace-only files.
 * **Remove Empty Folders**: Recursively traverses directory structures and removes empty folders from the deepest subdirectory upward, ensuring nested empty structures are fully cleared.
 
-### 8. Convert Indentation
+### 7. Convert Indentation
 Converts leading line indentation between tabs and spaces.
 * **Tab-Centered Defaults**: Standardizes tabs as the default target style.
 * **Customizable Sizes**: Allows mapping custom space-equivalent counts when converting to/from tabs.
@@ -76,7 +72,6 @@ You can customize the extension behavior in your `settings.json`:
 Open the **Command Palette** (`Ctrl+Shift+P` on Windows/Linux or `Cmd+Shift+P` on macOS) and search for the following commands:
 
 * `Clean Code: Remove Comments` - Cleans single-line and multi-line comments.
-* `Clean Code: Remove Dead Code` - Cleans unused variables, imports, and symbols.
 * `Clean Code: Remove Empty Lines` - Cleans consecutive or invalid empty lines.
 * `Clean Code: Remove Trailing Spaces` - Cleans trailing whitespaces at the end of lines.
 * `Clean Code: Remove Console Logs` - Cleans debug console logs while preserving errors.

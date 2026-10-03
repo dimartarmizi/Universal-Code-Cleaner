@@ -5,14 +5,12 @@ import { getLanguageByExtension } from '../core/registry';
 import { scanWorkspace } from '../core/scanner';
 import { CommentProcessor } from '../processors/comment';
 import { ConsoleLogProcessor } from '../processors/consoleLog';
-import { DeadCodeProcessor } from '../processors/deadCode';
 import { EmptyLinesProcessor } from '../processors/emptyLines';
 import { IndentProcessor } from '../processors/indent';
 import { SortImportsProcessor } from '../processors/sortImports';
 import { TrailingSpacesProcessor } from '../processors/trailingSpaces';
 
 const commentProcessor = new CommentProcessor();
-const deadCodeProcessor = new DeadCodeProcessor();
 const emptyLinesProcessor = new EmptyLinesProcessor();
 const trailingSpacesProcessor = new TrailingSpacesProcessor();
 const consoleLogProcessor = new ConsoleLogProcessor();
@@ -22,11 +20,6 @@ const indentProcessor = new IndentProcessor();
 export async function removeCommentsWorkspace(targetFolder?: vscode.WorkspaceFolder) {
 	const files = await scanWorkspace(getSettings().ignore, targetFolder);
 	await applyProcessorToWorkspace(commentProcessor, files, getLanguageByExtension);
-}
-
-export async function removeDeadCodeWorkspace(targetFolder?: vscode.WorkspaceFolder) {
-	const files = await scanWorkspace(getSettings().ignore, targetFolder);
-	await applyProcessorToWorkspace(deadCodeProcessor, files, getLanguageByExtension);
 }
 
 export async function removeEmptyLinesWorkspace(targetFolder?: vscode.WorkspaceFolder) {
