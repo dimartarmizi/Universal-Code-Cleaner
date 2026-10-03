@@ -1,3 +1,4 @@
+import * as vscode from 'vscode';
 import { getSettings } from '../core/config';
 import { applyProcessorToWorkspace } from '../core/engine';
 import { getLanguageByExtension } from '../core/registry';
@@ -18,37 +19,37 @@ const consoleLogProcessor = new ConsoleLogProcessor();
 const sortImportsProcessor = new SortImportsProcessor();
 const indentProcessor = new IndentProcessor();
 
-export async function removeCommentsWorkspace() {
-	const files = await scanWorkspace(getSettings().ignore);
+export async function removeCommentsWorkspace(targetFolder?: vscode.WorkspaceFolder) {
+	const files = await scanWorkspace(getSettings().ignore, targetFolder);
 	await applyProcessorToWorkspace(commentProcessor, files, getLanguageByExtension);
 }
 
-export async function removeDeadCodeWorkspace() {
-	const files = await scanWorkspace(getSettings().ignore);
+export async function removeDeadCodeWorkspace(targetFolder?: vscode.WorkspaceFolder) {
+	const files = await scanWorkspace(getSettings().ignore, targetFolder);
 	await applyProcessorToWorkspace(deadCodeProcessor, files, getLanguageByExtension);
 }
 
-export async function removeEmptyLinesWorkspace() {
-	const files = await scanWorkspace(getSettings().ignore);
+export async function removeEmptyLinesWorkspace(targetFolder?: vscode.WorkspaceFolder) {
+	const files = await scanWorkspace(getSettings().ignore, targetFolder);
 	await applyProcessorToWorkspace(emptyLinesProcessor, files, getLanguageByExtension);
 }
 
-export async function removeTrailingSpacesWorkspace() {
-	const files = await scanWorkspace(getSettings().ignore);
+export async function removeTrailingSpacesWorkspace(targetFolder?: vscode.WorkspaceFolder) {
+	const files = await scanWorkspace(getSettings().ignore, targetFolder);
 	await applyProcessorToWorkspace(trailingSpacesProcessor, files, getLanguageByExtension);
 }
 
-export async function removeConsoleLogsWorkspace() {
-	const files = await scanWorkspace(getSettings().ignore);
+export async function removeConsoleLogsWorkspace(targetFolder?: vscode.WorkspaceFolder) {
+	const files = await scanWorkspace(getSettings().ignore, targetFolder);
 	await applyProcessorToWorkspace(consoleLogProcessor, files, getLanguageByExtension);
 }
 
-export async function sortImportsWorkspace() {
-	const files = await scanWorkspace(getSettings().ignore);
+export async function sortImportsWorkspace(targetFolder?: vscode.WorkspaceFolder) {
+	const files = await scanWorkspace(getSettings().ignore, targetFolder);
 	await applyProcessorToWorkspace(sortImportsProcessor, files, getLanguageByExtension);
 }
 
-export async function convertIndentWorkspace() {
-	const files = await scanWorkspace(getSettings().ignore);
+export async function convertIndentWorkspace(targetFolder?: vscode.WorkspaceFolder) {
+	const files = await scanWorkspace(getSettings().ignore, targetFolder);
 	await applyProcessorToWorkspace(indentProcessor, files, getLanguageByExtension);
 }

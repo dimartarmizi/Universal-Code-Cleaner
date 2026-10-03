@@ -32,6 +32,8 @@ import { UnifiedViewProvider, FileItem } from './ui/sidebar';
 import * as fs from 'fs';
 import * as vscode from 'vscode';
 
+import { getActiveWorkspaceFolder } from './core/scanner';
+
 const PROCESSOR_MAP: Record<string, CodeCleanerProcessor> = {
 	'Comments': new CommentProcessor(),
 	'DeadCode': new DeadCodeProcessor(),
@@ -42,26 +44,82 @@ const PROCESSOR_MAP: Record<string, CodeCleanerProcessor> = {
 	'Indent': new IndentProcessor()
 };
 
+async function resolveWorkspaceFolderScope(): Promise<vscode.WorkspaceFolder | undefined | 'CANCEL' | 'ALL'> {
+	const folders = vscode.workspace.workspaceFolders;
+	if (!folders || folders.length <= 1) {
+		return undefined;
+	}
+
+	const activeFolder = getActiveWorkspaceFolder();
+	const activeFolderName = activeFolder ? activeFolder.name : 'None';
+
+	const choice = await vscode.window.showQuickPick(
+		[
+			{
+				label: `$(root-folder) Active Project Only (${activeFolderName})`,
+				description: activeFolder?.uri.fsPath,
+				target: 'active'
+			},
+			{
+				label: `$(repo) All Project Roots (${folders.length} folders)`,
+				description: 'Scan across all open workspace folders',
+				target: 'all'
+			}
+		],
+		{ placeHolder: 'Multi-root workspace detected: select scan scope' }
+	);
+
+	if (!choice) {
+		return 'CANCEL';
+	}
+
+	return choice.target === 'active' ? activeFolder : 'ALL';
+}
+
 async function promptScopeAndExecute(
 	actionName: string,
 	currentFileAction: () => Promise<void>,
-	workspaceAction: () => Promise<void>
+	workspaceAction: (targetFolder?: vscode.WorkspaceFolder) => Promise<void>
 ) {
-	const choice = await vscode.window.showQuickPick(
-		[
-			{ label: '$(file) Current File', description: `Apply to active document only` },
-			{ label: '$(files) Workspace', description: `Apply to all supported files in workspace` }
-		],
-		{
-			placeHolder: `Choose scope for: ${actionName}`
-		}
-	);
+	const folders = vscode.workspace.workspaceFolders;
+	const isMultiRoot = folders && folders.length > 1;
+
+	const options: { label: string; description: string; scope: 'file' | 'activeProject' | 'workspace' }[] = [
+		{ label: '$(file) Current File', description: 'Apply to active document only', scope: 'file' }
+	];
+
+	if (isMultiRoot) {
+		const activeFolder = getActiveWorkspaceFolder();
+		options.push({
+			label: `$(root-folder) Active Project (${activeFolder?.name || 'Active'})`,
+			description: 'Scan active project root folder only',
+			scope: 'activeProject'
+		});
+		options.push({
+			label: `$(files) Entire Workspace (${folders.length} projects)`,
+			description: 'Scan all project folders in workspace',
+			scope: 'workspace'
+		});
+	} else {
+		options.push({
+			label: '$(files) Workspace',
+			description: 'Apply to all supported files in workspace',
+			scope: 'workspace'
+		});
+	}
+
+	const choice = await vscode.window.showQuickPick(options, {
+		placeHolder: `Choose scope for: ${actionName}`
+	});
 
 	if (choice) {
-		if (choice.label.includes('Current File')) {
+		if (choice.scope === 'file') {
 			await currentFileAction();
-		} else if (choice.label.includes('Workspace')) {
-			await workspaceAction();
+		} else if (choice.scope === 'activeProject') {
+			const activeFolder = getActiveWorkspaceFolder();
+			await workspaceAction(activeFolder);
+		} else if (choice.scope === 'workspace') {
+			await workspaceAction(undefined);
 		}
 	}
 }
@@ -474,24 +532,51 @@ export function activate(context: vscode.ExtensionContext) {
 
 			if (!actionChoice.requiresScope) {
 				lastCommandId = actionChoice.id;
-				const directCommands: Record<string, () => Promise<void>> = {
+				const directCommands: Record<string, (targetFolder?: vscode.WorkspaceFolder) => Promise<void>> = {
 					'codeCleaner.removeEmptyFiles': removeEmptyFilesWorkspace,
 					'codeCleaner.removeEmptyFolders': removeEmptyFoldersWorkspace
 				};
 				const directAction = directCommands[actionChoice.id];
 				if (directAction) {
-					await directAction();
+					const folderScope = await resolveWorkspaceFolderScope();
+					if (folderScope === 'CANCEL') {
+						return;
+					}
+					await directAction(folderScope === 'ALL' ? undefined : folderScope);
 				}
 				return;
 			}
 
-			const scopeChoice = await vscode.window.showQuickPick(
-				[
-					{ label: '$(file) Current File', scope: 'current' },
-					{ label: '$(files) Workspace', scope: 'workspace' }
-				],
-				{ placeHolder: `Select scope for ${actionChoice.label}` }
-			);
+			const folders = vscode.workspace.workspaceFolders;
+			const isMultiRoot = folders && folders.length > 1;
+
+			const scopeOptions: { label: string; description?: string; scope: 'current' | 'activeProject' | 'workspace' }[] = [
+				{ label: '$(file) Current File', description: 'Apply to active document only', scope: 'current' }
+			];
+
+			if (isMultiRoot) {
+				const activeFolder = getActiveWorkspaceFolder();
+				scopeOptions.push({
+					label: `$(root-folder) Active Project (${activeFolder?.name || 'Active'})`,
+					description: 'Scan active project root folder only',
+					scope: 'activeProject'
+				});
+				scopeOptions.push({
+					label: `$(files) Entire Workspace (${folders.length} projects)`,
+					description: 'Scan all project folders in workspace',
+					scope: 'workspace'
+				});
+			} else {
+				scopeOptions.push({
+					label: '$(files) Workspace',
+					description: 'Apply to all supported files in workspace',
+					scope: 'workspace'
+				});
+			}
+
+			const scopeChoice = await vscode.window.showQuickPick(scopeOptions, {
+				placeHolder: `Select scope for ${actionChoice.label}`
+			});
 
 			if (!scopeChoice) {
 				return;
@@ -499,14 +584,16 @@ export function activate(context: vscode.ExtensionContext) {
 
 			lastCommandId = actionChoice.id;
 
+			const targetFolder = scopeChoice.scope === 'activeProject' ? getActiveWorkspaceFolder() : undefined;
+
 			const mapCommands: Record<string, () => Promise<void>> = {
-				'codeCleaner.removeComments': scopeChoice.scope === 'current' ? removeCommentsCurrentFile : removeCommentsWorkspace,
-				'codeCleaner.removeDeadCode': scopeChoice.scope === 'current' ? removeDeadCodeCurrentFile : removeDeadCodeWorkspace,
-				'codeCleaner.removeEmptyLines': scopeChoice.scope === 'current' ? removeEmptyLinesCurrentFile : removeEmptyLinesWorkspace,
-				'codeCleaner.removeTrailingSpaces': scopeChoice.scope === 'current' ? removeTrailingSpacesCurrentFile : removeTrailingSpacesWorkspace,
-				'codeCleaner.removeConsoleLogs': scopeChoice.scope === 'current' ? removeConsoleLogsCurrentFile : removeConsoleLogsWorkspace,
-				'codeCleaner.sortImports': scopeChoice.scope === 'current' ? sortImportsCurrentFile : sortImportsWorkspace,
-				'codeCleaner.convertIndent': scopeChoice.scope === 'current' ? convertIndentCurrentFile : convertIndentWorkspace
+				'codeCleaner.removeComments': scopeChoice.scope === 'current' ? removeCommentsCurrentFile : () => removeCommentsWorkspace(targetFolder),
+				'codeCleaner.removeDeadCode': scopeChoice.scope === 'current' ? removeDeadCodeCurrentFile : () => removeDeadCodeWorkspace(targetFolder),
+				'codeCleaner.removeEmptyLines': scopeChoice.scope === 'current' ? removeEmptyLinesCurrentFile : () => removeEmptyLinesWorkspace(targetFolder),
+				'codeCleaner.removeTrailingSpaces': scopeChoice.scope === 'current' ? removeTrailingSpacesCurrentFile : () => removeTrailingSpacesWorkspace(targetFolder),
+				'codeCleaner.removeConsoleLogs': scopeChoice.scope === 'current' ? removeConsoleLogsCurrentFile : () => removeConsoleLogsWorkspace(targetFolder),
+				'codeCleaner.sortImports': scopeChoice.scope === 'current' ? sortImportsCurrentFile : () => sortImportsWorkspace(targetFolder),
+				'codeCleaner.convertIndent': scopeChoice.scope === 'current' ? convertIndentCurrentFile : () => convertIndentWorkspace(targetFolder)
 			};
 
 			const selectedAction = mapCommands[actionChoice.id];
@@ -672,14 +759,22 @@ export function activate(context: vscode.ExtensionContext) {
 	const disposableRemoveEmptyFiles = vscode.commands.registerCommand(
 		'codeCleaner.removeEmptyFiles',
 		async () => {
-			await removeEmptyFilesWorkspace();
+			const folderScope = await resolveWorkspaceFolderScope();
+			if (folderScope === 'CANCEL') {
+				return;
+			}
+			await removeEmptyFilesWorkspace(folderScope === 'ALL' ? undefined : folderScope);
 		}
 	);
 
 	const disposableRemoveEmptyFolders = vscode.commands.registerCommand(
 		'codeCleaner.removeEmptyFolders',
 		async () => {
-			await removeEmptyFoldersWorkspace();
+			const folderScope = await resolveWorkspaceFolderScope();
+			if (folderScope === 'CANCEL') {
+				return;
+			}
+			await removeEmptyFoldersWorkspace(folderScope === 'ALL' ? undefined : folderScope);
 		}
 	);
 

@@ -4,9 +4,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-export async function removeEmptyFilesWorkspace() {
+export async function removeEmptyFilesWorkspace(targetFolder?: vscode.WorkspaceFolder) {
 	const settings = getSettings();
-	const files = await scanWorkspace(settings.ignore);
+	const files = await scanWorkspace(settings.ignore, targetFolder);
 
 	const emptyFiles: string[] = [];
 
@@ -57,9 +57,9 @@ export async function removeEmptyFilesWorkspace() {
 	);
 }
 
-export async function removeEmptyFoldersWorkspace() {
+export async function removeEmptyFoldersWorkspace(targetFolder?: vscode.WorkspaceFolder) {
 	const settings = getSettings();
-	const folders = vscode.workspace.workspaceFolders;
+	const folders = targetFolder ? [targetFolder] : vscode.workspace.workspaceFolders;
 	if (!folders || folders.length === 0) {
 		return;
 	}
