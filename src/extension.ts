@@ -2,7 +2,7 @@ import {
 	removeCommentsCurrentFile,
 	removeEmptyLinesCurrentFile,
 	removeTrailingSpacesCurrentFile,
-	removeConsoleLogsCurrentFile,
+	removeDebugStatementsCurrentFile,
 	sortImportsCurrentFile,
 	convertIndentCurrentFile
 } from './commands/file';
@@ -11,13 +11,13 @@ import {
 	removeCommentsWorkspace,
 	removeEmptyLinesWorkspace,
 	removeTrailingSpacesWorkspace,
-	removeConsoleLogsWorkspace,
+	removeDebugStatementsWorkspace,
 	sortImportsWorkspace,
 	convertIndentWorkspace
 } from './commands/workspace';
 import { getSettings } from './core/config';
 import { CommentProcessor } from './processors/comment';
-import { ConsoleLogProcessor } from './processors/consoleLog';
+import { DebugStatementsProcessor } from './processors/debugStatements';
 import { EmptyLinesProcessor } from './processors/emptyLines';
 import { IndentProcessor } from './processors/indent';
 import { SortImportsProcessor } from './processors/sortImports';
@@ -35,7 +35,7 @@ const PROCESSOR_MAP: Record<string, CodeCleanerProcessor> = {
 	'Comments': new CommentProcessor(),
 	'EmptyLines': new EmptyLinesProcessor(),
 	'TrailingSpaces': new TrailingSpacesProcessor(),
-	'ConsoleLog': new ConsoleLogProcessor(),
+	'DebugStatements': new DebugStatementsProcessor(),
 	'SortImports': new SortImportsProcessor(),
 	'Indent': new IndentProcessor()
 };
@@ -510,7 +510,7 @@ export function activate(context: vscode.ExtensionContext) {
 					{ label: '$(comment-discussion) Remove Comments', id: 'codeCleaner.removeComments', requiresScope: true },
 					{ label: '$(whitespace) Remove Empty Lines', id: 'codeCleaner.removeEmptyLines', requiresScope: true },
 					{ label: '$(symbol-keyword) Remove Trailing Spaces', id: 'codeCleaner.removeTrailingSpaces', requiresScope: true },
-					{ label: '$(terminal) Remove Console Logs', id: 'codeCleaner.removeConsoleLogs', requiresScope: true },
+					{ label: '$(debug) Remove Debug & Dump Statements', id: 'codeCleaner.removeDebugStatements', requiresScope: true },
 					{ label: '', kind: vscode.QuickPickItemKind.Separator },
 					{ label: '$(references) Sort Imports', id: 'codeCleaner.sortImports', requiresScope: true },
 					{ label: '$(indent) Convert Indentation', id: 'codeCleaner.convertIndent', requiresScope: true },
@@ -585,7 +585,7 @@ export function activate(context: vscode.ExtensionContext) {
 				'codeCleaner.removeComments': scopeChoice.scope === 'current' ? removeCommentsCurrentFile : () => removeCommentsWorkspace(targetFolder),
 				'codeCleaner.removeEmptyLines': scopeChoice.scope === 'current' ? removeEmptyLinesCurrentFile : () => removeEmptyLinesWorkspace(targetFolder),
 				'codeCleaner.removeTrailingSpaces': scopeChoice.scope === 'current' ? removeTrailingSpacesCurrentFile : () => removeTrailingSpacesWorkspace(targetFolder),
-				'codeCleaner.removeConsoleLogs': scopeChoice.scope === 'current' ? removeConsoleLogsCurrentFile : () => removeConsoleLogsWorkspace(targetFolder),
+				'codeCleaner.removeDebugStatements': scopeChoice.scope === 'current' ? removeDebugStatementsCurrentFile : () => removeDebugStatementsWorkspace(targetFolder),
 				'codeCleaner.sortImports': scopeChoice.scope === 'current' ? sortImportsCurrentFile : () => sortImportsWorkspace(targetFolder),
 				'codeCleaner.convertIndent': scopeChoice.scope === 'current' ? convertIndentCurrentFile : () => convertIndentWorkspace(targetFolder)
 			};
@@ -722,10 +722,10 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	);
 
-	const disposableRemoveConsoleLogs = vscode.commands.registerCommand(
-		'codeCleaner.removeConsoleLogs',
+	const disposableRemoveDebugStatements = vscode.commands.registerCommand(
+		'codeCleaner.removeDebugStatements',
 		async () => {
-			await promptScopeAndExecute('Remove Console Logs', removeConsoleLogsCurrentFile, removeConsoleLogsWorkspace);
+			await promptScopeAndExecute('Remove Debug & Dump Statements', removeDebugStatementsCurrentFile, removeDebugStatementsWorkspace);
 		}
 	);
 
@@ -769,7 +769,7 @@ export function activate(context: vscode.ExtensionContext) {
 		disposableRemoveComments,
 		disposableRemoveEmptyLines,
 		disposableRemoveTrailingSpaces,
-		disposableRemoveConsoleLogs,
+		disposableRemoveDebugStatements,
 		disposableSortImports,
 		disposableConvertIndent,
 		disposableRemoveEmptyFiles,

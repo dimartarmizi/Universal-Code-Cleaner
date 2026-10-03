@@ -5,6 +5,10 @@ export interface CommentRemoverSettings {
 	keep: string[];
 	preview: boolean;
 	autoSave: boolean;
+	debugStatements: {
+		keepConsoleError: boolean;
+		keepConsoleWarn: boolean;
+	};
 	consoleLogs: {
 		keepError: boolean;
 		keepWarn: boolean;
@@ -20,14 +24,21 @@ export interface CommentRemoverSettings {
 
 export function getSettings(): CommentRemoverSettings {
 	const config = vscode.workspace.getConfiguration('codeCleaner');
+	const keepError = config.get<boolean>('debugStatements.keepConsoleError') ?? config.get<boolean>('consoleLogs.keepError') !== false;
+	const keepWarn = config.get<boolean>('debugStatements.keepConsoleWarn') ?? config.get<boolean>('consoleLogs.keepWarn') === true;
+
 	return {
 		ignore: config.get<string[]>('ignore') || [],
 		keep: config.get<string[]>('keep') || [],
 		preview: config.get<boolean>('preview') !== false,
 		autoSave: config.get<boolean>('autoSave') !== false,
+		debugStatements: {
+			keepConsoleError: keepError,
+			keepConsoleWarn: keepWarn
+		},
 		consoleLogs: {
-			keepError: config.get<boolean>('consoleLogs.keepError') !== false,
-			keepWarn: config.get<boolean>('consoleLogs.keepWarn') === true
+			keepError: keepError,
+			keepWarn: keepWarn
 		},
 		emptyLines: {
 			maxConsecutive: config.get<number>('emptyLines.maxConsecutive') ?? 1

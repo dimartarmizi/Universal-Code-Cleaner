@@ -3,33 +3,44 @@ import { getSettings } from '../core/config';
 import { CodeCleanerProcessor } from './types';
 import * as vscode from 'vscode';
 
-export class ConsoleLogProcessor implements CodeCleanerProcessor {
-	readonly name = 'ConsoleLog';
+export class DebugStatementsProcessor implements CodeCleanerProcessor {
+	readonly name = 'DebugStatements';
 
 	async scan(document: vscode.TextDocument): Promise<vscode.Range[]> {
 		const text = document.getText();
 		const ranges: vscode.Range[] = [];
+		const len = text.length;
 		const settings = getSettings();
 
-		const methods = ['log', 'debug', 'info', 'trace', 'dir'];
-		if (!settings.consoleLogs.keepWarn) {
-			methods.push('warn');
-		}
-		if (!settings.consoleLogs.keepError) {
-			methods.push('error');
+		const bareKeywordPattern = /\b(debugger|breakpoint\s*\(\s*\))\s*;?/g;
+		let bareMatch: RegExpExecArray | null;
+		while ((bareMatch = bareKeywordPattern.exec(text)) !== null) {
+			const startOffset = bareMatch.index;
+			const endOffset = bareKeywordPattern.lastIndex;
+			ranges.push(expandToFullLineIfIsolated(document, startOffset, endOffset));
 		}
 
-		const consolePattern = new RegExp(`\\bconsole\\s*\\.\\s*(${methods.join('|')})\\s*\\(`, 'g');
+		const consoleMethods = ['log', 'debug', 'info', 'trace', 'dir'];
+		if (!settings.debugStatements.keepConsoleWarn) {
+			consoleMethods.push('warn');
+		}
+		if (!settings.debugStatements.keepConsoleError) {
+			consoleMethods.push('error');
+		}
 
-		let match;
-		while ((match = consolePattern.exec(text)) !== null) {
+		const dumpFunctionPattern = new RegExp(
+			`\\b(var_dump|dump|dd|print_r|pdb\\.set_trace|ipdb\\.set_trace|dbg!|console\\s*\\.\\s*(?:${consoleMethods.join('|')}))\\s*\\(`,
+			'g'
+		);
+		let match: RegExpExecArray | null;
+		while ((match = dumpFunctionPattern.exec(text)) !== null) {
 			const startOffset = match.index;
 			let parenCount = 1;
-			let endOffset = consolePattern.lastIndex;
+			let endOffset = dumpFunctionPattern.lastIndex;
 			let inString: string | null = null;
 			let escape = false;
 
-			while (endOffset < text.length && parenCount > 0) {
+			while (endOffset < len && parenCount > 0) {
 				const char = text[endOffset];
 
 				if (escape) {
@@ -62,10 +73,10 @@ export class ConsoleLogProcessor implements CodeCleanerProcessor {
 
 			if (parenCount === 0) {
 				let trailingOffset = endOffset;
-				while (trailingOffset < text.length && /\s/.test(text[trailingOffset])) {
+				while (trailingOffset < len && /[\t ]/.test(text[trailingOffset])) {
 					trailingOffset++;
 				}
-				if (trailingOffset < text.length && text[trailingOffset] === ';') {
+				if (trailingOffset < len && text[trailingOffset] === ';') {
 					endOffset = trailingOffset + 1;
 				}
 

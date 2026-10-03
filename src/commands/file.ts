@@ -1,6 +1,6 @@
 import { applyProcessorToEditor } from '../core/engine';
 import { CommentProcessor } from '../processors/comment';
-import { ConsoleLogProcessor } from '../processors/consoleLog';
+import { DebugStatementsProcessor } from '../processors/debugStatements';
 import { EmptyLinesProcessor } from '../processors/emptyLines';
 import { IndentProcessor } from '../processors/indent';
 import { SortImportsProcessor } from '../processors/sortImports';
@@ -10,7 +10,7 @@ import * as vscode from 'vscode';
 const commentProcessor = new CommentProcessor();
 const emptyLinesProcessor = new EmptyLinesProcessor();
 const trailingSpacesProcessor = new TrailingSpacesProcessor();
-const consoleLogProcessor = new ConsoleLogProcessor();
+const debugStatementsProcessor = new DebugStatementsProcessor();
 const sortImportsProcessor = new SortImportsProcessor();
 const indentProcessor = new IndentProcessor();
 
@@ -41,13 +41,13 @@ export async function removeTrailingSpacesCurrentFile() {
 	await applyProcessorToEditor(editor, trailingSpacesProcessor);
 }
 
-export async function removeConsoleLogsCurrentFile() {
+export async function removeDebugStatementsCurrentFile() {
 	const editor = vscode.window.activeTextEditor;
 	if (!editor) {
 		vscode.window.showErrorMessage('No active text editor found.');
 		return;
 	}
-	await applyProcessorToEditor(editor, consoleLogProcessor);
+	await applyProcessorToEditor(editor, debugStatementsProcessor);
 }
 
 export async function sortImportsCurrentFile() {

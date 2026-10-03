@@ -11,7 +11,7 @@ export async function applyProcessorToEditor(editor: vscode.TextEditor, processo
 		'TrailingSpaces': 'trailing spaces',
 		'EmptyFiles': 'empty files',
 		'EmptyFolders': 'empty folders',
-		'ConsoleLog': 'console logs',
+		'DebugStatements': 'debug & dump statements',
 		'SortImports': 'sorted imports',
 		'Indent': 'indentations'
 	};
@@ -53,7 +53,7 @@ export async function applyProcessorToWorkspace(processor: CodeCleanerProcessor,
 		'TrailingSpaces': 'trailing spaces',
 		'EmptyFiles': 'empty files',
 		'EmptyFolders': 'empty folders',
-		'ConsoleLog': 'console logs',
+		'DebugStatements': 'debug & dump statements',
 		'SortImports': 'sorted imports',
 		'Indent': 'indentations'
 	};

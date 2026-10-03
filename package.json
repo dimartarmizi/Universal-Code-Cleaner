@@ -48,8 +48,8 @@
         "title": "Clean Code: Remove Trailing Spaces"
       },
       {
-        "command": "codeCleaner.removeConsoleLogs",
-        "title": "Clean Code: Remove Console Logs"
+        "command": "codeCleaner.removeDebugStatements",
+        "title": "Clean Code: Remove Debug & Logs"
       },
       {
         "command": "codeCleaner.sortImports",
@@ -319,15 +319,15 @@
           "default": true,
           "description": "Automatically save modified files."
         },
-        "codeCleaner.consoleLogs.keepError": {
+        "codeCleaner.debugStatements.keepConsoleError": {
           "type": "boolean",
           "default": true,
-          "description": "Preserve console.error statements when cleaning console logs."
+          "description": "Preserve console.error statements when cleaning debug & log statements."
         },
-        "codeCleaner.consoleLogs.keepWarn": {
+        "codeCleaner.debugStatements.keepConsoleWarn": {
           "type": "boolean",
           "default": false,
-          "description": "Preserve console.warn statements when cleaning console logs."
+          "description": "Preserve console.warn statements when cleaning debug & log statements."
         },
         "codeCleaner.emptyLines.maxConsecutive": {
           "type": "integer",

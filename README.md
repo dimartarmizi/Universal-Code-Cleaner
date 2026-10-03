@@ -6,7 +6,7 @@
 
 [![Visual Studio Code](https://img.shields.io/badge/VS%20Code-007ACC?style=for-the-badge)](https://code.visualstudio.com/) [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
-A powerful, highly modular, and safe Visual Studio Code extension to sanitize, clean, and optimize your codebase. Instantly remove comments, excessive empty lines, trailing whitespaces, console logs, and empty structural elements either from your current active file or across the entire workspace.
+A powerful, highly modular, and safe Visual Studio Code extension to sanitize, clean, and optimize your codebase. Instantly remove comments, excessive empty lines, trailing whitespaces, debug/dump statements & logs, and empty structural elements either from your current active file or across the workspace.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/dimartarmizi/universal-code-cleaner/main/media/demo.gif" alt="Universal Code Cleaner Demo">
@@ -29,12 +29,13 @@ Reduces consecutive blank lines to standard code formatting rules.
 ### 3. Remove Trailing Spaces
 Instantly deletes whitespaces, tabs, and trailing indentations lingering at the end of code lines.
 
-### 4. Remove Console Logs (Safe Mode)
-Performs safe cleanup of browser/Node console commands:
-* **Removes**: `console.log`, `console.debug`, `console.warn`, `console.info`, `console.trace`, and `console.dir`.
-* **Retains**: `console.error` is kept intact as it is vital for production error logging and telemetry.
+### 4. Remove Debug & Logs
+Universal cleanup of debuggers, dumps, and logging calls across multiple languages:
+* **Debuggers & Breakpoints**: `debugger;`, `breakpoint()`.
+* **Dump Statements**: PHP (`dd(...)`, `dump(...)`, `var_dump(...)`, `print_r(...)`), Python (`pdb.set_trace(...)`, `ipdb.set_trace(...)`), Rust (`dbg!(...)`).
+* **Console Logs**: `console.log`, `console.debug`, `console.info`, `console.trace`, `console.dir`, plus configurable `console.warn` / `console.error`.
 
-### 5. Sort Imports (Universal)
+### 5. Sort Imports
 Organizes and sorts your imports alphabetically, removing duplicates and cleaning empty lines inside the import block.
 * **Universal Language Support**: Detects and sorts imports across JavaScript, TypeScript, Python (`import` & `from`), Go (`import`), Rust (`use`), PHP (`use`), CSS/SCSS (`@import`), and C/C++ (`#include`).
 
@@ -59,8 +60,8 @@ You can customize the extension behavior in your `settings.json`:
 | `codeCleaner.keep` | `array` | `["license", "ts-ignore", "eslint-disable", "prettier-ignore"]` | Case-insensitive keywords inside comments to preserve. (Supports Settings UI) |
 | `codeCleaner.preview` | `boolean` | `true` | Show a confirmation dialog detailing the number of files and edits before applying changes. |
 | `codeCleaner.autoSave` | `boolean` | `true` | Automatically save files after performing cleanup actions. |
-| `codeCleaner.consoleLogs.keepError` | `boolean` | `true` | Preserve `console.error` statements when cleaning console logs. |
-| `codeCleaner.consoleLogs.keepWarn` | `boolean` | `false` | Preserve `console.warn` statements when cleaning console logs. |
+| `codeCleaner.debugStatements.keepConsoleError` | `boolean` | `true` | Preserve `console.error` statements when cleaning debug & log statements. |
+| `codeCleaner.debugStatements.keepConsoleWarn` | `boolean` | `false` | Preserve `console.warn` statements when cleaning debug & log statements. |
 | `codeCleaner.emptyLines.maxConsecutive` | `integer` | `1` | Maximum consecutive empty lines allowed in a document. |
 | `codeCleaner.indent.style` | `string` | `"tab"` | Target indentation style (`"tab"` or `"space"`). |
 | `codeCleaner.indent.size` | `integer` | `4` | Number of spaces equivalent to one tab for conversion. |
@@ -74,7 +75,7 @@ Open the **Command Palette** (`Ctrl+Shift+P` on Windows/Linux or `Cmd+Shift+P` o
 * `Clean Code: Remove Comments` - Cleans single-line and multi-line comments.
 * `Clean Code: Remove Empty Lines` - Cleans consecutive or invalid empty lines.
 * `Clean Code: Remove Trailing Spaces` - Cleans trailing whitespaces at the end of lines.
-* `Clean Code: Remove Console Logs` - Cleans debug console logs while preserving errors.
+* `Clean Code: Remove Debug & Logs` - Cleans debug statements, dump calls (`dd`, `var_dump`, `breakpoint`), and console logs.
 * `Clean Code: Sort Imports` - Alphabetizes and optimizes block imports.
 * `Clean Code: Convert Indentation` - Standardizes line indentations between tabs and spaces.
 * `Clean Code: Remove Empty Files` - Removes 0-byte or empty files from the workspace.
@@ -88,7 +89,7 @@ Open the **Command Palette** (`Ctrl+Shift+P` on Windows/Linux or `Cmd+Shift+P` o
 
 Universal Code Cleaner employs the **Strategy Pattern** to ensure high extensibility and robust operation:
 * **`src/core/`**: Central driver engine (`engine.ts`), language registry (`registry.ts`), AST/comment parser (`parser.ts`), workspace file scanner (`scanner.ts`), and configuration loader (`config.ts`).
-* **`src/processors/`**: Modular cleaning task implementations (`commentProcessor.ts`, `deadCodeProcessor.ts`, etc.) conforming to the `IProcessor` interface.
+* **`src/processors/`**: Modular cleaning task implementations (`comment.ts`, `debugStatements.ts`, `emptyLines.ts`, etc.) conforming to the `CodeCleanerProcessor` interface.
 * **`src/ui/`**: Safe Preview System panel and virtual diff provider (`sidebar.ts`, `provider.ts`, `manager.ts`) allowing side-by-side review before applying edits.
 
 ---
